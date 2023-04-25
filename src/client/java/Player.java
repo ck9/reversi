@@ -1,6 +1,5 @@
 package client.java;
 
-public class Client {
-	
+public class Player {
     
 }

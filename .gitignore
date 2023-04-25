@@ -26,3 +26,4 @@ replay_pid*
 # block_list file
 block_list.txt
 .metadata/*
+/bin/
