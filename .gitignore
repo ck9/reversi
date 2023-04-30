@@ -28,4 +28,8 @@ block_list.txt
 .metadata/*
 /bin/
 
+# Eclipse
 .project
+
+# VSCode
+.vscode
