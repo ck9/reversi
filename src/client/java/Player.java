@@ -1,9 +1,14 @@
+package client.java;
+
 public class Player {
+	private String myName; //プレイヤ名
+	private String myColor; //先手後手情報(白黒)
 
-	private String myName = ""; //プレイヤ名
-	private String myColor = ""; //先手後手情報(白黒)
-
-	// メソッド
+	public Player(){
+		myName = "";
+		myColor = "";
+	}
+	
 	public void setName(String name){ // プレイヤ名を受付
 		myName = name;
 	}
@@ -12,6 +17,7 @@ public class Player {
 		return myName;
 	}
 	
+	// color: 先手後手情報(black or white)
 	public void setColor(String c){ // 先手後手情報の設定
 		myColor = c;
 	}
