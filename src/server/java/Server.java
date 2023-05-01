@@ -1,11 +1,7 @@
 package server.java;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class Server{
 	private int port; // サーバの待ち受けポート
@@ -68,10 +64,10 @@ public class Server{
 		}
 	}
 
-	public boolean block(String PlayerIP) {
+	public boolean isBlocked(String PlayerIP) {
 		BufferedReader br1 = null;
 		try {
-			br1 = new BufferedReader(new FileReader("blacklist.txt"));
+			br1 = new BufferedReader(new FileReader("black_list.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -79,13 +75,13 @@ public class Server{
 		try {
 			while((s = br1.readLine()) != null) {
 				if(s.equals(PlayerIP)) {
-					return false;
+					return true;
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return false;
 	}
 
 
