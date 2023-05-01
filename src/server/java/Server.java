@@ -95,7 +95,7 @@ public class Server{
 	}
 
 	public static void main(String[] args){ //main
-		Server server = new Server(10000); //待ち受けポート10000番でサーバオブジェクトを準備
+		Server server = new Server(8888); //待ち受けポート8888番でサーバオブジェクトを準備
 		server.acceptClient(); //クライアント受け入れを開始
 	}
 }
