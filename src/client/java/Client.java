@@ -2,12 +2,13 @@ package client.java;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-
+import java.util.*;
 import javax.swing.*;
 
 public class Client extends JFrame{
@@ -34,8 +35,12 @@ public class Client extends JFrame{
         myPlayer = new Player();
         opponentPlayer = new Player();
 
-        myPlayer.setName("Player1");
-        // TODO: プレイヤ名の入力を受け付けるようにする
+        // String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
+        // if (playerName == null) {
+        //     playerName = "Player";
+        // }
+        // myPlayer.setName(playerName);
+        myPlayer.setName("Player"); //TODO: 後で上記と差し替える
 
         contentPane = new JPanel();
         cardLayout = new CardLayout();
@@ -86,6 +91,7 @@ class TitlePanel extends JPanel {
     private Player opponentPlayer;
     private GamePanel gamePanel;
     private NetworkPanel networkPanel;
+    Random random = new Random();
 
     public TitlePanel(Othello othello, Player myPlayer, Player opponentPlayer) {
         this.othello = othello;
@@ -184,6 +190,15 @@ class TitlePanel extends JPanel {
     public void startGameLocal(int difficulty) {
         othello.startGameLocal(difficulty);
         opponentPlayer.setName("CPU(" + othello.getGameMode() + ")");
+        random.setSeed(System.currentTimeMillis());
+        if (random.nextInt(2) == 0) {
+            myPlayer.setColor("black");
+            opponentPlayer.setColor("white");
+        } else {
+            myPlayer.setColor("white");
+            opponentPlayer.setColor("black");
+        }
+
         ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
         gamePanel.startGame();
     }
@@ -276,56 +291,269 @@ class GamePanel extends JPanel {
     private Player myPlayer;
     private Player opponentPlayer;
 
-    private JLabel gameMode;
+    private JLabel myStoneIconLabel, opponentStoneIconLabel;
+    private JLabel myTurnIconLabel, opponentTurnIconLabel;
     private JLabel myName, opponentName;
-    private JPanel boardPanel;
+
+    private JButton passBtn, giveUpBtn;
+    private JButton[] boardBtns;
+
+    ImageIcon whiteIcon = new ImageIcon("src/client/resources/White.jpg");
+    ImageIcon blackIcon = new ImageIcon("src/client/resources/Black.jpg");
+    ImageIcon whiteIcon2 = new ImageIcon("src/client/resources/White.png");
+    ImageIcon blackIcon2 = new ImageIcon("src/client/resources/Black.png");
+    ImageIcon boardIcon = new ImageIcon("src/client/resources/GreenFrame.jpg");
+    ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.jpg");
+    ImageIcon turnIcon = new ImageIcon("src/client/resources/TurnTriangle.png");
 
     public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
 
-        // TODO: ゲーム画面・インターフェース実装
         JPanel gameScreenPanel = new JPanel();
         gameScreenPanel.setLayout(new BorderLayout());
         
-        gameScreenPanel.add(Box.createVerticalStrut(100), BorderLayout.NORTH);
-        
-        gameMode = new JLabel("ゲームモード: ");
-        gameMode.setFont(new Font("Arial", Font.PLAIN, 20));
-        gameMode.setAlignmentX(Component.CENTER_ALIGNMENT);
-        gameScreenPanel.add(gameMode, BorderLayout.CENTER);
+        JPanel passBtnsPanel = new JPanel();
+        passBtnsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        passBtn = new JButton("パス");
+        passBtn.setPreferredSize(new Dimension(180, 40));
+        passBtn.setFont(new Font("Arial", Font.PLAIN, 20));
+        passBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                putStorn(-1, -1);
+            }
+        });
+        passBtnsPanel.add(passBtn);
+        giveUpBtn = new JButton("投了");
+        giveUpBtn.setPreferredSize(new Dimension(180, 40));
+        giveUpBtn.setFont(new Font("Arial", Font.PLAIN, 20));
+        giveUpBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                endGame("usergiveup");
+            }
+        });
+        passBtnsPanel.add(giveUpBtn);
+        gameScreenPanel.add(passBtnsPanel, BorderLayout.NORTH);
+
+        JPanel boardPanel = new JPanel();
+        boardPanel.setLayout(new GridLayout(othello.get_row(), othello.get_row()));
+        boardBtns = new JButton[othello.get_row() * othello.get_row()];
+        int iconWidth = 360 / othello.get_row();
+        Dimension iconSize = new Dimension(iconWidth, iconWidth);
+        Insets noMargin = new Insets(0, 0, 0, 0);
+        for (int i = 0; i < othello.get_row(); i++) {
+            for (int j = 0; j < othello.get_row(); j++) {
+                int x = j;
+                int y = i;
+                boardBtns[i * othello.get_row() + j] = new JButton();
+                boardBtns[i * othello.get_row() + j].setPreferredSize(iconSize);
+                boardBtns[i * othello.get_row() + j].setMargin(noMargin);
+                boardBtns[i * othello.get_row() + j].setBorder(null);
+                boardBtns[i * othello.get_row() + j].setBorderPainted(false);
+                boardBtns[i * othello.get_row() + j].setContentAreaFilled(false);
+                boardBtns[i * othello.get_row() + j].setOpaque(false);
+                boardBtns[i * othello.get_row() + j].setIcon(boardIcon);
+                boardBtns[i * othello.get_row() + j].addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        putStorn(x, y);
+                    }
+                });
+                boardPanel.add(boardBtns[i * othello.get_row() + j]);
+            }
+        }
+        gameScreenPanel.add(boardPanel, BorderLayout.CENTER);
+
 
         JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
-        
-        myName = new JLabel(myPlayer.getName());
-        myName.setFont(new Font("Arial", Font.PLAIN, 20));
-        myName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        infoPanel.add(myName);
-        infoPanel.add(Box.createHorizontalStrut(20));
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.add(Box.createVerticalStrut(24));
 
-        JLabel vsLabel = new JLabel("VS");
-        vsLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        vsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        infoPanel.add(vsLabel);
-        infoPanel.add(Box.createHorizontalStrut(20));
+        JPanel myInfoPanel = new JPanel();
+        myInfoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        myInfoPanel.add(Box.createHorizontalStrut(20));
+        myTurnIconLabel = new JLabel(turnIcon);
+        myTurnIconLabel.setPreferredSize(new Dimension(40, 40));
+        myInfoPanel.add(myTurnIconLabel);
+        myStoneIconLabel = new JLabel(blackIcon2);
+        myStoneIconLabel.setPreferredSize(new Dimension(40, 40));
+        myInfoPanel.add(myStoneIconLabel);        
+        myInfoPanel.add(Box.createHorizontalStrut(8));
+        myName = new JLabel(myPlayer.getName()+"(You)");
+        myName.setFont(new Font("Arial", Font.PLAIN, 30));
+        myInfoPanel.add(myName);
+        infoPanel.add(myInfoPanel);
 
+        infoPanel.add(Box.createVerticalStrut(5));
+
+        JPanel opponentInfoPanel = new JPanel();
+        opponentInfoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        opponentInfoPanel.add(Box.createHorizontalStrut(20));
+        opponentTurnIconLabel = new JLabel(turnIcon);
+        opponentTurnIconLabel.setPreferredSize(new Dimension(40, 40));
+        opponentInfoPanel.add(opponentTurnIconLabel);
+        opponentStoneIconLabel = new JLabel(whiteIcon2);
+        opponentStoneIconLabel.setPreferredSize(new Dimension(40, 40));
+        opponentInfoPanel.add(opponentStoneIconLabel);
+        opponentInfoPanel.add(Box.createHorizontalStrut(8));
         opponentName = new JLabel(opponentPlayer.getName());
-        opponentName.setFont(new Font("Arial", Font.PLAIN, 20));
-        opponentName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        infoPanel.add(opponentName);
+        opponentName.setFont(new Font("Arial", Font.PLAIN, 30));
+        opponentInfoPanel.add(opponentName);
+        infoPanel.add(opponentInfoPanel);
 
         gameScreenPanel.add(infoPanel, BorderLayout.SOUTH);
 
         add(gameScreenPanel, BorderLayout.CENTER);
     }
 
+    public void putStorn(int x, int y) {
+        // 自分のターンでない場合は何もしない
+        if (othello.get_turn() != myPlayer.getColor()) {
+            return;
+        }
+        // 正常な座標をクリックした場合(パスの場合は-1, -1なのでスキップ)
+        if (0 <= x && x < othello.get_row() && 0 <= y && y < othello.get_row()) {
+            ArrayList<Position> possible_moves = othello.get_possible_moves(othello.get_board(), othello.get_turn());
+            // 置けない場所をクリックした場合は何もしない
+            Boolean is_valid_move = false;
+            for (Position pos : possible_moves) {
+                if (pos.getX() == x && pos.getY() == y) {
+                    is_valid_move = true;
+                }
+            }
+            if (!is_valid_move) {
+                return;
+            }
+            else {
+                othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
+            }
+        }
+        othello.chenge_turn();
+        updateBoard();
+        opponentPutStorn();
+    }
+
+    public void opponentPutStorn() {
+        // 相手のターンの処理(ネットワーク対戦)
+        if (othello.getGameMode() == "pvp") {
+            // TODO: ネットワーク対戦の処理
+        }
+        // 相手のターンの処理(コンピュータ対戦)
+        else{
+            Position computerMove = othello.get_computer_move(othello.get_board(), othello.get_turn(), othello.getGameMode());
+            if (computerMove.getX() != -1 && computerMove.getY() != -1){
+                othello.make_move(othello.get_board(), computerMove, othello.get_turn());
+            }
+        }
+        othello.chenge_turn();
+        updateBoard();
+    }
+
+    private void updateBoard(){
+        int[][] board = othello.get_board();
+        ArrayList<Position> possible_moves = othello.get_possible_moves(board, othello.get_turn());
+        // パスの有効化・無効化
+        if (possible_moves.size() == 0){
+            passBtn.setEnabled(true);
+        }
+        else{
+            passBtn.setEnabled(false);
+        }
+        // 盤面の更新
+        for (int i = 0; i < othello.get_row(); i++) {
+            for (int j = 0; j < othello.get_row(); j++) {
+                if (board[i][j] == -1) {
+                    boardBtns[i * othello.get_row() + j].setIcon(boardIcon);
+                } else if (board[i][j] == 1) {
+                    boardBtns[i * othello.get_row() + j].setIcon(blackIcon);
+                } else if (board[i][j] == 0) {
+                    boardBtns[i * othello.get_row() + j].setIcon(whiteIcon);
+                }
+                for (Position pos : possible_moves) {
+                    if (pos.getX() == j && pos.getY() == i) {
+                        boardBtns[i * othello.get_row() + j].setIcon(possibleIcon);
+                    }
+                }
+            }
+        }
+        // info表示の更新
+        if (myPlayer.getColor() == "black") {
+            myStoneIconLabel.setIcon(blackIcon2);
+            opponentStoneIconLabel.setIcon(whiteIcon2);
+            if (othello.get_turn() == "black") {
+                myTurnIconLabel.setIcon(turnIcon);
+                opponentTurnIconLabel.setIcon(null);
+            } else {
+                myTurnIconLabel.setIcon(null);
+                opponentTurnIconLabel.setIcon(turnIcon);
+            }
+        } else {
+            myStoneIconLabel.setIcon(whiteIcon2);
+            opponentStoneIconLabel.setIcon(blackIcon2);
+            if (othello.get_turn() == "white") {
+                myTurnIconLabel.setIcon(turnIcon);
+                opponentTurnIconLabel.setIcon(null);
+            } else {
+                myTurnIconLabel.setIcon(null);
+                opponentTurnIconLabel.setIcon(turnIcon);
+            }
+        }
+        if (othello.is_end_state(board)) {
+            endGame("end");
+        }
+    }
+
+    public void endGame(String mode) {
+        int[][] board = othello.get_board();
+        String message;
+        if (mode.equals("usergiveup")){
+            message = "あなたの投了負けです";
+        }
+        else if (mode.equals("opponentgiveup")){
+            message = "相手が投了しました";
+        }
+        else{
+            int blackCount = 0;
+            int whiteCount = 0;
+            for (int i = 0; i < othello.get_row(); i++) {
+                for (int j = 0; j < othello.get_row(); j++) {
+                    if (board[i][j] == 1) {
+                        blackCount++;
+                    } else if (board[i][j] == 0) {
+                        whiteCount++;
+                    }
+                }
+            }
+            message = "黒: " + blackCount + "  白: " + whiteCount + "\n";
+            if (blackCount > whiteCount) {
+                if (myPlayer.getColor() == "black") {
+                    message += "You Win!\n";
+                } else {
+                    message += "You Lose...\n";
+                }
+            } else if (blackCount < whiteCount) {
+                if (myPlayer.getColor() == "black") {
+                    message += "You Lose...\n";
+                } else {
+                    message += "You Win!\n";
+                }
+            } else {
+                message += "Draw\n";
+            }
+        }
+        JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.INFORMATION_MESSAGE);
+        ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
+    }
+
     public void startGame() {
-        gameMode.setText("ゲームモード: " + othello.getGameMode());
+        // gameMode.setText("ゲームモード: " + othello.getGameMode());
         myName.setText(myPlayer.getName());
         opponentName.setText(opponentPlayer.getName());
-        boardPanel.repaint();
+        // 相手が先手の場合は待機
+        if (opponentPlayer.getColor() == "black") {
+            opponentPutStorn();
+        }
+        updateBoard();
     }
 }
 
