@@ -327,6 +327,7 @@ class GamePanel extends JPanel {
     private Player opponentPlayer;
     private Server server;
 
+    private JPanel gameScreenPanel;
     private JLabel myStoneIconLabel, opponentStoneIconLabel;
     private JLabel myTurnIconLabel, opponentTurnIconLabel;
     private JLabel myName, opponentName;
@@ -348,7 +349,7 @@ class GamePanel extends JPanel {
         this.opponentPlayer = opponentPlayer;
         this.server = server;
 
-        JPanel gameScreenPanel = new JPanel();
+        gameScreenPanel = new JPanel();
         gameScreenPanel.setLayout(new BorderLayout());
         
         JPanel passBtnsPanel = new JPanel();
@@ -577,6 +578,11 @@ class GamePanel extends JPanel {
         if (othello.is_end_state(board)) {
             endGame("end");
         }
+
+        // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
+        gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
+
+        System.out.println("updateBoar(Turn: " + othello.get_turn() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
