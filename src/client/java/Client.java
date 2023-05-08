@@ -2,12 +2,6 @@ package client.java;
 
 import java.awt.*;
 import java.awt.event.*;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.*;
 import javax.swing.*;
 
@@ -18,6 +12,7 @@ public class Client extends JFrame{
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
+    private Server server;
 
     private TitlePanel titlePanel;
     private NetworkPanel networkPanel;
@@ -34,6 +29,7 @@ public class Client extends JFrame{
         othello = new Othello();
         myPlayer = new Player();
         opponentPlayer = new Player();
+        server = new Server();
 
         // String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
         // if (playerName == null) {
@@ -48,8 +44,8 @@ public class Client extends JFrame{
         setContentPane(contentPane);
 
         titlePanel = new TitlePanel(othello, myPlayer, opponentPlayer);
-        networkPanel = new NetworkPanel(othello, myPlayer, opponentPlayer, port);
-        gamePanel = new GamePanel(othello, myPlayer, opponentPlayer);
+        networkPanel = new NetworkPanel(myPlayer, opponentPlayer, port, server);
+        gamePanel = new GamePanel(othello, myPlayer, opponentPlayer, server);
         titlePanel.setGamePanel(gamePanel);
         titlePanel.setNetworkPanel(networkPanel);
         networkPanel.setGamePanel(gamePanel);
@@ -83,7 +79,6 @@ public class Client extends JFrame{
         return;
     }
 }
-
 
 class TitlePanel extends JPanel {
     private Othello othello;
@@ -220,64 +215,104 @@ class TitlePanel extends JPanel {
 }
 
 class NetworkPanel extends JPanel {
-    private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private String serverIP;
+    private Server server;
+
     private int port;
     private GamePanel gamePanel;
 
+    private JLabel connectingInfoLabel;
+    private JLabel serverInfoLabel1;
+    private JLabel serverInfoLabel2;
 
-    public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port) {
-        this.othello = othello;
+    public NetworkPanel(Player myPlayer, Player opponentPlayer, int port, Server server) {
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
+        this.server = server;
         this.port = port;
-        
-        // TODO: ネットワーク対戦 接続処理
-        serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
-        
+
         JPanel connectingScreenPanel = new JPanel();
         connectingScreenPanel.setLayout(new BorderLayout());
 
         connectingScreenPanel.add(Box.createVerticalStrut(100), BorderLayout.NORTH);
 
-        JLabel label = new JLabel("接続画面");
-        label.setFont(new Font("Arial", Font.PLAIN, 20));
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        connectingScreenPanel.add(label, BorderLayout.CENTER);
+        JPanel connecctingInfoPanel = new JPanel();
+        connecctingInfoPanel.setLayout(new BoxLayout(connecctingInfoPanel, BoxLayout.Y_AXIS));
+
+        // ゲームモード表示(ネットワーク対戦)
+        JLabel connectingLabel = new JLabel("ネットワーク対戦");
+        connectingLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+        connectingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(connectingLabel);
+
+        connecctingInfoPanel.add(Box.createVerticalStrut(80));
+
+        //接続状況表示
+        connectingInfoLabel = new JLabel("");
+        connectingInfoLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        connectingInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(connectingInfoLabel);
+
+        connecctingInfoPanel.add(Box.createVerticalStrut(40));
+
+        //接続先サーバー情報表示(IPアドレス:ポート番号)
+        serverInfoLabel1 = new JLabel("");
+        serverInfoLabel1.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(serverInfoLabel1);
+        serverInfoLabel2 = new JLabel("");
+        serverInfoLabel2.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(serverInfoLabel2);
+
+        connectingScreenPanel.add(connecctingInfoPanel, BorderLayout.CENTER);
 
         add(connectingScreenPanel, BorderLayout.CENTER);
-        
-        startConnect();
     }
 
     public void startConnect() {
     	try {
-        	Socket socket = new Socket(serverIP, port);
-        
-        	OutputStream os = socket.getOutputStream();
-		   	PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-        	BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        	
-        	writer.println(myPlayer.getName());
-        	opponentPlayer.setName(reader.readLine());
-        	myPlayer.setColor(reader.readLine());
+            connectingInfoLabel.setText("");
+            serverInfoLabel1.setText("");
+            serverInfoLabel2.setText("");
+
+            // サーバーIPの入力
+            String serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
+            if (serverIP == null) {
+                throw new Exception();
+            }
+
+            // サーバーへ接続
+            server.connect(serverIP, port);
+
+            // 接続中の表示
+            connectingInfoLabel.setText("対戦相手を探しています...");
+            serverInfoLabel1.setText("サーバー情報");
+            serverInfoLabel2.setText(serverIP + ":" + port);
+
+           //自分の名前を送信
+           server.sendToServer(myPlayer.getName());
+
+           // 相手が接続したら相手の名前、自分の色が順に送られてくる
+           opponentPlayer.setName(server.receiveFromServer());
+           myPlayer.setColor(server.receiveFromServer());
+
+           // 相手の色を設定
+           if (myPlayer.getColor().equals("black")) {
+               opponentPlayer.setColor("white");
+           } else {
+               opponentPlayer.setColor("black");
+           }
+
+           // ゲーム開始
+           ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
+           gamePanel.startGame();
+            
         }catch(Exception e){
         	JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
+        	((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
         }
-    	
-    }
-
-    public void startGame() {
-
-        myPlayer.setColor("black");
-
-        opponentPlayer.setName("testB");
-        opponentPlayer.setColor("white");
-
-        ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
-        gamePanel.startGame();
     }
 
     public void setGamePanel(GamePanel gamePanel) {
@@ -290,6 +325,7 @@ class GamePanel extends JPanel {
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
+    private Server server;
 
     private JLabel myStoneIconLabel, opponentStoneIconLabel;
     private JLabel myTurnIconLabel, opponentTurnIconLabel;
@@ -306,10 +342,11 @@ class GamePanel extends JPanel {
     ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.jpg");
     ImageIcon turnIcon = new ImageIcon("src/client/resources/TurnTriangle.png");
 
-    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer) {
+    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, Server server) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
+        this.server = server;
 
         JPanel gameScreenPanel = new JPanel();
         gameScreenPanel.setLayout(new BorderLayout());
@@ -406,6 +443,10 @@ class GamePanel extends JPanel {
         add(gameScreenPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * @param x
+     * @param y
+     */
     public void putStorn(int x, int y) {
         // 自分のターンでない場合は何もしない
         if (othello.get_turn() != myPlayer.getColor()) {
@@ -425,6 +466,7 @@ class GamePanel extends JPanel {
                 return;
             }
             else {
+                System.out.println("putStorn: " + x + ", " + y); //TODO: 削除
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
@@ -441,6 +483,7 @@ class GamePanel extends JPanel {
         // 相手のターンの処理(コンピュータ対戦)
         else{
             Position computerMove = othello.get_computer_move(othello.get_board(), othello.get_turn(), othello.getGameMode());
+            System.out.println("computerMove: " + computerMove.getX() + ", " + computerMove.getY()); //TODO: 削除
             if (computerMove.getX() != -1 && computerMove.getY() != -1){
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
