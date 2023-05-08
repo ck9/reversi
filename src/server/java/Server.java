@@ -2,12 +2,15 @@ package server.java;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
+import java.util.Random;
 
 public class Server{
 	private int port; // サーバの待ち受けポート
 	private boolean [] online; //オンライン状態管理用配列
 	private PrintWriter [] out; //データ送信用オブジェクト
 	private Receiver [] receiver; //データ受信用オブジェクト
+	private int color=0; //先手後手決定のためのint
+	private boolean color1;
 
 	//コンストラクタ
 	public Server(int port) { //待ち受けポートを引数とする
@@ -89,13 +92,46 @@ public class Server{
 	}
 
 	public void sendColor(int playerNo){ //先手後手情報(白黒)の送信
+		if(color==0) {
+		Random r = new Random();
+		int r1 = r.nextInt(2);
+		if(r1 == 0) {
+		out[playerNo].println("black");
+		color1 = false;
+		}else {
+			out[playerNo].println("white");
+			color1 = true;
+		}
+		color=1;
+		}else if(color==1) {
+			if(color1==false) {
+				out[playerNo].println("white");
+			}else {
+				out[playerNo].println("black");
+			}
+			color=0;
+		}
+
 	}
 
 	public void forwardMessage(String msg, int playerNo){ //操作情報の転送
+		out[playerNo].println(msg);
 	}
 
 	public static void main(String[] args){ //main
-		Server server = new Server(8888); //待ち受けポート8888番でサーバオブジェクトを準備
-		server.acceptClient(); //クライアント受け入れを開始
+		if (args.length > 0) {
+            try {
+                int port = Integer.parseInt(args[0]);
+                if (port > 0 && port < 65536) {
+                	Server server = new Server(port);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                 return;
+            }
+        }
+        Server server = new Server(8888);
+        server.acceptClient(); //クライアント受け入れを開始
+        return;
 	}
 }
