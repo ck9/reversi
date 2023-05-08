@@ -219,60 +219,96 @@ class NetworkPanel extends JPanel {
     private Player opponentPlayer;
     private Server server;
 
-    private String serverIP;
     private int port;
     private GamePanel gamePanel;
+
+    private JLabel connectingInfoLabel;
+    private JLabel serverInfoLabel1;
+    private JLabel serverInfoLabel2;
 
     public NetworkPanel(Player myPlayer, Player opponentPlayer, int port, Server server) {
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
         this.server = server;
         this.port = port;
-        serverIP = "127.0.0.1";
 
         JPanel connectingScreenPanel = new JPanel();
         connectingScreenPanel.setLayout(new BorderLayout());
 
         connectingScreenPanel.add(Box.createVerticalStrut(100), BorderLayout.NORTH);
 
-        JLabel label = new JLabel("接続画面");
-        label.setFont(new Font("Arial", Font.PLAIN, 20));
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        connectingScreenPanel.add(label, BorderLayout.CENTER);
+        JPanel connecctingInfoPanel = new JPanel();
+        connecctingInfoPanel.setLayout(new BoxLayout(connecctingInfoPanel, BoxLayout.Y_AXIS));
+
+        // ゲームモード表示(ネットワーク対戦)
+        JLabel connectingLabel = new JLabel("ネットワーク対戦");
+        connectingLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+        connectingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(connectingLabel);
+
+        connecctingInfoPanel.add(Box.createVerticalStrut(80));
+
+        //接続状況表示
+        connectingInfoLabel = new JLabel("");
+        connectingInfoLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        connectingInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(connectingInfoLabel);
+
+        connecctingInfoPanel.add(Box.createVerticalStrut(40));
+
+        //接続先サーバー情報表示(IPアドレス:ポート番号)
+        serverInfoLabel1 = new JLabel("");
+        serverInfoLabel1.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(serverInfoLabel1);
+        serverInfoLabel2 = new JLabel("");
+        serverInfoLabel2.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        connecctingInfoPanel.add(serverInfoLabel2);
+
+        connectingScreenPanel.add(connecctingInfoPanel, BorderLayout.CENTER);
 
         add(connectingScreenPanel, BorderLayout.CENTER);
-        
-        startConnect();
     }
 
     public void startConnect() {
     	try {
+            connectingInfoLabel.setText("");
+            serverInfoLabel1.setText("");
+            serverInfoLabel2.setText("");
+
             // サーバーIPの入力
-            serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
+            String serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
             if (serverIP == null) {
                 throw new Exception();
             }
+
             // サーバーへ接続
             server.connect(serverIP, port);
+
+            // 接続中の表示
+            connectingInfoLabel.setText("対戦相手を探しています...");
+            serverInfoLabel1.setText("サーバー情報");
+            serverInfoLabel2.setText(serverIP + ":" + port);
+
+           //自分の名前を送信
+           server.sendToServer(myPlayer.getName());
+
+           // 相手が接続したら相手の名前、自分の色が順に送られてくる
+           opponentPlayer.setName(server.receiveFromServer());
+           myPlayer.setColor(server.receiveFromServer());
+
+           // 相手の色を設定
+           if (myPlayer.getColor().equals("black")) {
+               opponentPlayer.setColor("white");
+           } else {
+               opponentPlayer.setColor("black");
+           }
+
+           // ゲーム開始
+           ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
+           gamePanel.startGame();
             
-            //自分の名前を送信
-            server.sendToServer(myPlayer.getName());
-
-            // 相手が接続したら相手の名前、自分の色が順に送られてくる
-            opponentPlayer.setName(server.receiveFromServer());
-            myPlayer.setColor(server.receiveFromServer());
-
-            // 相手の色を設定
-            if (myPlayer.getColor().equals("black")) {
-                opponentPlayer.setColor("white");
-            } else {
-                opponentPlayer.setColor("black");
-            }
-
-            // ゲーム開始
-            ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
-            gamePanel.startGame();
-
         }catch(Exception e){
         	JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
         	((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
