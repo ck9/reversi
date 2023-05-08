@@ -367,7 +367,7 @@ class GamePanel extends JPanel {
         giveUpBtn.setFont(new Font("Arial", Font.PLAIN, 20));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                endGame("usergiveup");
+                endGame("playerGiveUp");
             }
         });
         passBtnsPanel.add(giveUpBtn);
@@ -472,13 +472,45 @@ class GamePanel extends JPanel {
         }
         othello.change_turn();
         updateBoard();
+
+        // ネットワーク対戦の場合はサーバーに自分の指し手を送信
+        if (othello.getGameMode() == "pvp") {
+            try {
+                server.sendToServer(x + " " + y);
+            } catch (Exception e) {
+                e.printStackTrace();
+                endGame("connectionError");
+            }
+        }
+
+        // 相手のターンの処理
         opponentPutStorn();
     }
 
     public void opponentPutStorn() {
         // 相手のターンの処理(ネットワーク対戦)
         if (othello.getGameMode() == "pvp") {
-            // TODO: ネットワーク対戦の処理
+            try {
+                // 相手の指し手を受信
+                String opponentMove = server.receiveFromServer();
+                System.out.println("opponentMove: " + opponentMove); //TODO: 削除
+                String[] opponentMoveArray = opponentMove.split(" ");
+                int x = Integer.parseInt(opponentMoveArray[0]);
+                int y = Integer.parseInt(opponentMoveArray[1]);
+
+                // "-2 -2": 相手が投了または切断、ゲーム終了
+                if (x == -2 && y == -2) {
+                    endGame("opponentGiveUp");
+                    return;
+                }
+                // "-1 -1": 相手がパス (それ以外なら相手の座標を反映)
+                else if (x != -1 && y != -1) {
+                    othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                endGame("connectionError");
+            }
         }
         // 相手のターンの処理(コンピュータ対戦)
         else{
@@ -541,6 +573,7 @@ class GamePanel extends JPanel {
                 opponentTurnIconLabel.setIcon(turnIcon);
             }
         }
+        // ゲーム終了判定
         if (othello.is_end_state(board)) {
             endGame("end");
         }
@@ -549,11 +582,14 @@ class GamePanel extends JPanel {
     public void endGame(String mode) {
         int[][] board = othello.get_board();
         String message;
-        if (mode.equals("usergiveup")){
+        if (mode.equals("playerGiveUp")){
             message = "あなたの投了負けです";
         }
-        else if (mode.equals("opponentgiveup")){
-            message = "相手が投了しました";
+        else if (mode.equals("opponentGiveUp")){
+            message = "相手が投了しました\nあなたの勝利です";
+        }
+        else if (mode.equals("connectionError")){
+            message = "サーバーとの接続が切れました\nゲームを終了します";
         }
         else{
             int blackCount = 0;
@@ -589,7 +625,6 @@ class GamePanel extends JPanel {
     }
 
     public void startGame() {
-        // gameMode.setText("ゲームモード: " + othello.getGameMode());
         myName.setText(myPlayer.getName());
         opponentName.setText(opponentPlayer.getName());
         // 相手が先手の場合は待機
