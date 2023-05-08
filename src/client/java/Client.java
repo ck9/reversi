@@ -625,7 +625,7 @@ class GamePanel extends JPanel {
     }
 
     public void startGame() {
-        myName.setText(myPlayer.getName());
+        myName.setText(myPlayer.getName() + " (You)");
         opponentName.setText(opponentPlayer.getName());
         // 相手が先手の場合は待機
         if (opponentPlayer.getColor() == "black") {
