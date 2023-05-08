@@ -385,6 +385,10 @@ class GamePanel extends JPanel {
         add(gameScreenPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * @param x
+     * @param y
+     */
     public void putStorn(int x, int y) {
         // 自分のターンでない場合は何もしない
         if (othello.get_turn() != myPlayer.getColor()) {
@@ -404,6 +408,7 @@ class GamePanel extends JPanel {
                 return;
             }
             else {
+                System.out.println("putStorn: " + x + ", " + y); //TODO: 削除
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
@@ -420,6 +425,7 @@ class GamePanel extends JPanel {
         // 相手のターンの処理(コンピュータ対戦)
         else{
             Position computerMove = othello.get_computer_move(othello.get_board(), othello.get_turn(), othello.getGameMode());
+            System.out.println("computerMove: " + computerMove.getX() + ", " + computerMove.getY()); //TODO: 削除
             if (computerMove.getX() != -1 && computerMove.getY() != -1){
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
