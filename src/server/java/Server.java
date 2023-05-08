@@ -2,6 +2,7 @@ package server.java;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
+import java.util.Random;
 
 public class Server{
 	private int port; // サーバの待ち受けポート
