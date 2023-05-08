@@ -1,10 +1,15 @@
 package client.java;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.lang.reflect.Array;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.*;
+import javax.swing.*;
 
 public class Client extends JFrame{
     // private Player myPlayer;
@@ -214,8 +219,6 @@ class TitlePanel extends JPanel {
     }
 }
 
-
-
 class NetworkPanel extends JPanel {
     private Othello othello;
     private Player myPlayer;
@@ -224,13 +227,16 @@ class NetworkPanel extends JPanel {
     private int port;
     private GamePanel gamePanel;
 
+
     public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
         this.port = port;
-
+        
         // TODO: ネットワーク対戦 接続処理
+        serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
+        
         JPanel connectingScreenPanel = new JPanel();
         connectingScreenPanel.setLayout(new BorderLayout());
 
@@ -242,10 +248,25 @@ class NetworkPanel extends JPanel {
         connectingScreenPanel.add(label, BorderLayout.CENTER);
 
         add(connectingScreenPanel, BorderLayout.CENTER);
+        
+        startConnect();
     }
 
     public void startConnect() {
-
+    	try {
+        	Socket socket = new Socket(serverIP, port);
+        
+        	OutputStream os = socket.getOutputStream();
+		   	PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+        	BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        	
+        	writer.println(myPlayer.getName());
+        	opponentPlayer.setName(reader.readLine());
+        	myPlayer.setColor(reader.readLine());
+        }catch(Exception e){
+        	JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
+        }
+    	
     }
 
     public void startGame() {
@@ -412,7 +433,7 @@ class GamePanel extends JPanel {
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
-        othello.chenge_turn();
+        othello.change_turn();
         updateBoard();
         opponentPutStorn();
     }
@@ -430,7 +451,7 @@ class GamePanel extends JPanel {
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
         }
-        othello.chenge_turn();
+        othello.change_turn();
         updateBoard();
     }
 
