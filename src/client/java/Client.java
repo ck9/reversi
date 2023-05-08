@@ -30,8 +30,12 @@ public class Client extends JFrame{
         myPlayer = new Player();
         opponentPlayer = new Player();
 
-        myPlayer.setName("Player1");
-        // TODO: プレイヤ名の入力を受け付けるようにする
+        // String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
+        // if (playerName == null) {
+        //     playerName = "Player";
+        // }
+        // myPlayer.setName(playerName);
+        myPlayer.setName("Player"); //TODO: 後で上記と差し替える
 
         contentPane = new JPanel();
         cardLayout = new CardLayout();
@@ -516,7 +520,7 @@ class GamePanel extends JPanel {
                 message += "Draw\n";
             }
         }
-        JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.INFORMATION_MESSAGE);
         ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
     }
 
