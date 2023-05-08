@@ -428,7 +428,7 @@ class GamePanel extends JPanel {
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
-        othello.chenge_turn();
+        othello.change_turn();
         updateBoard();
         opponentPutStorn();
     }
@@ -445,7 +445,7 @@ class GamePanel extends JPanel {
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
         }
-        othello.chenge_turn();
+        othello.change_turn();
         updateBoard();
     }
 
