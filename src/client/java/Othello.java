@@ -68,7 +68,7 @@ public class Othello {
     public String get_turn() {
         return current_turn;
     }
-    public void chenge_turn() {
+    public void change_turn() {
         if (current_turn.equals("black")) 
         current_turn = "white";
         else if (current_turn.equals("white")) 
@@ -112,14 +112,14 @@ public class Othello {
             }
           }
         }
-        board_value *= (int)3 * rnd;
+        board_value *= (int)(3 * rnd);
 
         //fsの実装
         int fs_value = 0;
         int black_fs = 0, white_fs = 0;
         List<Position> corners = new ArrayList<>(Arrays.asList(new Position(0, 0), new Position(row - 1,0), new Position(0, row - 1), new Position(row - 1, row - 1)));
         List<Position> dzs = new ArrayList<>(Arrays.asList(new Position(-1, 0),new Position(0, -1),new Position(0, 1), new Position(1, 0)));
-        boolean[][] checked = new boolean[row][row];
+        boolean[][] checked = new boolean[row][row];        
         for(Position corner:corners){
           if(board[corner.y][corner.x] == 1){
             black_fs++;
@@ -146,8 +146,10 @@ public class Othello {
             }
           }
         }
+        
+        //System.out.println("black_fs: " + black_fs + ", white_fs: " + white_fs);
         rnd = random.nextDouble();
-        fs_value = (black_fs - white_fs) + (int)rnd * 33;
+        fs_value = (black_fs - white_fs) + (int)(rnd * 33);
 
         int possible_moves_value = 0;
         ArrayList<Position> possible_moves = get_possible_moves(board, "black");
@@ -155,10 +157,11 @@ public class Othello {
         possible_moves = get_possible_moves(board, "white");
         possible_moves_value -= possible_moves.size();
         rnd = random.nextDouble();
-        possible_moves_value = (possible_moves_value + (int)rnd * 2) * 10;
+        possible_moves_value = (possible_moves_value + (int)(rnd * 2)) * 10;
 
         int result_value = 0;
         int fs_weight = 5, board_weight = 2, possible_moves_weight = 1;
+        //System.out.println("board_value: " + board_value + ", fs_value: " + fs_value + ", possible_moves_value: " + possible_moves_value);        
         result_value = board_value * board_weight + fs_value * fs_weight + possible_moves_value * possible_moves_weight;
 
         return result_value;
@@ -183,7 +186,7 @@ public class Othello {
         ArrayList<Position> possible_moves = get_possible_moves(board, turn);
         if (depth <= 0 || possible_moves.isEmpty())
           return cal_evaluation_value(board);
-
+        
         int val = 0;    
         if (turn.equals("black")) {
           val = Integer.MIN_VALUE;
@@ -227,10 +230,8 @@ public class Othello {
         if (possible_moves.isEmpty())
           return next_move;
 
-        int depth = 0;
-        if (game_mode.equals("normal")) 
-          depth = 5; 
-        else if (game_mode.equals("hard") || game_mode.equals("easy")) 
+        int depth = 3;
+        if (game_mode.equals("hard") || game_mode.equals("easy")) 
           depth = 7;
 
         int val = (game_mode.equals("easy") && turn.equals("white")) || (!game_mode.equals("easy") && turn.equals("black")) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -239,14 +240,17 @@ public class Othello {
         for (int i = 0; i < row; ++i)
             copiedboard[i] = board[i].clone();
         make_move(copiedboard, move, turn);
-        int new_val = minimax(copiedboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
-        if ((game_mode.equals("easy") && turn.equals("white")) || (!game_mode.equals("easy") && turn.equals("black"))) {
+        String next_turn = turn.equals("black") ? "white" : "black";
+        int new_val = minimax(copiedboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, next_turn);
+        if ((game_mode.equals("easy") && turn.equals("white")) || ((!game_mode.equals("easy")) && turn.equals("black"))) {
+          System.out.println("maximizing");
             if (val < new_val) {
             val = new_val;
             next_move = move;
             }
         } else {
             if (val > new_val) {
+            System.out.println("minimizing");
             val = new_val;
             next_move = move;
             }
@@ -397,7 +401,7 @@ public class Othello {
         Othello othello = new Othello();
 
         // ボードの初期化テスト
-        othello.startGameLocal(1);
+        othello.startGameLocal(0);
         System.out.println("startGameLocal:");
         printBoard(othello.current_board);
 
@@ -412,7 +416,9 @@ public class Othello {
         System.out.println(move.y + ", " + move.x);
 
         // コンピュータの手の取得テスト
-        Position computerMove = othello.get_computer_move(othello.current_board,"black", "hard");
+        System.out.println("Current board:");
+        printBoard(othello.current_board);
+        Position computerMove = othello.get_computer_move(othello.current_board,"black", "easy");
         System.out.println("Computer move (black, hard mode): " + computerMove.y + ", " + computerMove.x);
 
         // 手を進めるテスト
@@ -431,12 +437,12 @@ public class Othello {
 
         // フリップ個数が多いテスト
         int[][] test_board = new int[][] {
-        { -1, -1, -1, -1, -1, -1, -1, -1 },
-        { -1, 1, 1, 1, 1, 1, -1, -1 },
+        { 1, -1, -1, -1, 1, 0, 0, 0 },
+        { 1, 1, 1, 1, 1, 1, -1, -1 },
         { -1, 1, 0, 0, 0, 1, -1, -1 },
         { -1, 1, 0, 0, 0, 1, -1, -1 },
-        { -1, 1, 0, 0, 0, 1, -1, -1 },
-        { -1, 0, 1, 1, 1, 1, -1, -1 },
+        { -1, 1, 0, 0, 0, 1, -1, 1 },
+        { -1, 0, 1, 1, 1, 1, -1, 1 },
         { -1, -1, -1, -1, -1, -1, -1, -1 },
         { -1, -1, -1, -1, -1, -1, -1, -1 },
         };
@@ -453,6 +459,10 @@ public class Othello {
         int[] stoneCounts = othello.get_countStones(test_board);
         System.out.println("Black stones: " + stoneCounts[0]);
         System.out.println("White stones: " + stoneCounts[1]);
+        // 評価値計算テスト
+        int evaluationValue2 = othello.cal_evaluation_value(test_board);
+        System.out.println("Evaluation value: " + evaluationValue2);
+
     }
 
     // test用
