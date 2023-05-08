@@ -67,25 +67,24 @@ public class Server{
 		}
 	}
 
-	public boolean block(String PlayerIP) {
+	public boolean isBlocked(String PlayerIP) {
 		BufferedReader br1 = null;
 		try {
-			br1 = new BufferedReader(new FileReader("blacklist.txt"));
+			br1 = new BufferedReader(new FileReader("black_list.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			File file = new File("blacklist.txt");
 		}
 		String s;
 		try {
 			while((s = br1.readLine()) != null) {
 				if(s.equals(PlayerIP)) {
-					return false;
+					return true;
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return false;
 	}
 
 
