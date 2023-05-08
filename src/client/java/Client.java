@@ -535,6 +535,13 @@ class GamePanel extends JPanel {
         else{
             passBtn.setEnabled(false);
         }
+        // 投了の有効化・無効化(自分のターンのみ)
+        if (othello.get_turn().equals(myPlayer.getColor())){
+            giveUpBtn.setEnabled(true);
+        }
+        else{
+            giveUpBtn.setEnabled(false);
+        }
         // 盤面の更新
         for (int i = 0; i < othello.get_row(); i++) {
             for (int j = 0; j < othello.get_row(); j++) {
