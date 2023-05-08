@@ -227,16 +227,13 @@ class NetworkPanel extends JPanel {
     private int port;
     private GamePanel gamePanel;
 
-
     public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
         this.port = port;
-        
-        // TODO: ネットワーク対戦 接続処理
-        serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
-        
+        serverIP = "127.0.0.1";
+
         JPanel connectingScreenPanel = new JPanel();
         connectingScreenPanel.setLayout(new BorderLayout());
 
@@ -254,6 +251,12 @@ class NetworkPanel extends JPanel {
 
     public void startConnect() {
     	try {
+            // サーバーIPの入力
+            serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
+            if (serverIP == null) {
+                throw new Exception();
+            }
+
         	Socket socket = new Socket(serverIP, port);
         
         	OutputStream os = socket.getOutputStream();
@@ -265,8 +268,8 @@ class NetworkPanel extends JPanel {
         	myPlayer.setColor(reader.readLine());
         }catch(Exception e){
         	JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
+        	((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
         }
-    	
     }
 
     public void startGame() {
