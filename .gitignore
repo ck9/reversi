@@ -33,3 +33,5 @@ block_list.txt
 
 # VSCode
 .vscode
+
+src/client/java/OhtelloTest.java
