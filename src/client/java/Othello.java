@@ -225,7 +225,6 @@ public class Othello {
     public Position get_computer_move(int[][] board, String turn, String game_mode) {
         Position next_move = new Position(-1, -1);
         ArrayList<Position> possible_moves = get_possible_moves(board, turn);
-
         // 可能手がない場合は(-1, -1)を返す
         if (possible_moves.isEmpty())
           return next_move;

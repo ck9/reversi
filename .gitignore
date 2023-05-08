@@ -34,4 +34,8 @@ block_list.txt
 # VSCode
 .vscode
 
+# MacOS
+.DS_Store
+
+# for Test
 src/client/java/OhtelloTest.java
