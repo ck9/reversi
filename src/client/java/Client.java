@@ -367,7 +367,7 @@ class GamePanel extends JPanel {
         giveUpBtn.setFont(new Font("Arial", Font.PLAIN, 20));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                endGame("usergiveup");
+                endGame("playerGiveUp");
             }
         });
         passBtnsPanel.add(giveUpBtn);
@@ -479,7 +479,7 @@ class GamePanel extends JPanel {
                 server.sendToServer(x + " " + y);
             } catch (Exception e) {
                 e.printStackTrace();
-                endGame("connectionerror");
+                endGame("connectionError");
             }
         }
 
@@ -500,7 +500,7 @@ class GamePanel extends JPanel {
 
                 // "-2 -2": 相手が投了または切断、ゲーム終了
                 if (x == -2 && y == -2) {
-                    endGame("opponentgiveup");
+                    endGame("opponentGiveUp");
                     return;
                 }
                 // "-1 -1": 相手がパス (それ以外なら相手の座標を反映)
@@ -509,7 +509,7 @@ class GamePanel extends JPanel {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                endGame("connectionerror");
+                endGame("connectionError");
             }
         }
         // 相手のターンの処理(コンピュータ対戦)
@@ -579,17 +579,16 @@ class GamePanel extends JPanel {
         }
     }
 
-    // TODO modeの命名をもうちょいいい感じにする
     public void endGame(String mode) {
         int[][] board = othello.get_board();
         String message;
-        if (mode.equals("usergiveup")){
+        if (mode.equals("playerGiveUp")){
             message = "あなたの投了負けです";
         }
-        else if (mode.equals("opponentgiveup")){
-            message = "相手が投了しました";
+        else if (mode.equals("opponentGiveUp")){
+            message = "相手が投了しました\nあなたの勝利です";
         }
-        else if (mode.equals("connectionerror")){
+        else if (mode.equals("connectionError")){
             message = "サーバーとの接続が切れました\nゲームを終了します";
         }
         else{
@@ -626,7 +625,6 @@ class GamePanel extends JPanel {
     }
 
     public void startGame() {
-        // gameMode.setText("ゲームモード: " + othello.getGameMode());
         myName.setText(myPlayer.getName());
         opponentName.setText(opponentPlayer.getName());
         // 相手が先手の場合は待機
