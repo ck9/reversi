@@ -327,6 +327,7 @@ class GamePanel extends JPanel {
     private Player opponentPlayer;
     private Server server;
 
+    private JPanel gameScreenPanel;
     private JLabel myStoneIconLabel, opponentStoneIconLabel;
     private JLabel myTurnIconLabel, opponentTurnIconLabel;
     private JLabel myName, opponentName;
@@ -348,7 +349,7 @@ class GamePanel extends JPanel {
         this.opponentPlayer = opponentPlayer;
         this.server = server;
 
-        JPanel gameScreenPanel = new JPanel();
+        gameScreenPanel = new JPanel();
         gameScreenPanel.setLayout(new BorderLayout());
         
         JPanel passBtnsPanel = new JPanel();
@@ -534,6 +535,13 @@ class GamePanel extends JPanel {
         else{
             passBtn.setEnabled(false);
         }
+        // 投了の有効化・無効化(自分のターンのみ)
+        if (othello.get_turn().equals(myPlayer.getColor())){
+            giveUpBtn.setEnabled(true);
+        }
+        else{
+            giveUpBtn.setEnabled(false);
+        }
         // 盤面の更新
         for (int i = 0; i < othello.get_row(); i++) {
             for (int j = 0; j < othello.get_row(); j++) {
@@ -577,6 +585,11 @@ class GamePanel extends JPanel {
         if (othello.is_end_state(board)) {
             endGame("end");
         }
+
+        // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
+        gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
+
+        System.out.println("updateBoar(Turn: " + othello.get_turn() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
@@ -625,7 +638,7 @@ class GamePanel extends JPanel {
     }
 
     public void startGame() {
-        myName.setText(myPlayer.getName());
+        myName.setText(myPlayer.getName() + "(You)");
         opponentName.setText(opponentPlayer.getName());
         // 相手が先手の場合は待機
         if (opponentPlayer.getColor() == "black") {
