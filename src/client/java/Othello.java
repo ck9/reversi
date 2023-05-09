@@ -51,10 +51,10 @@ public class Othello {
         for (int x = 0; x < board[y].length; ++x) 
             board[y][x] = -1;
         }
-        board[row / 2 - 1][row / 2 - 1] = 1;
-        board[row / 2 - 1][row / 2] = 0;
-        board[row / 2][row / 2 - 1] = 0;
-        board[row / 2][row / 2] = 1;
+        board[row / 2 - 1][row / 2 - 1] = 0;
+        board[row / 2 - 1][row / 2] = 1;
+        board[row / 2][row / 2 - 1] = 1;
+        board[row / 2][row / 2] = 0;
     }
 
     public int get_row() {
@@ -227,12 +227,14 @@ public class Othello {
         Position next_move = new Position(-1, -1);
         ArrayList<Position> possible_moves = get_possible_moves(board, turn);
         // 可能手がない場合は(-1, -1)を返す
-        if (possible_moves.isEmpty())
+        if (possible_moves.isEmpty()){
+          System.out.println("no possible moves");
           return next_move;
+        }
 
         int depth = 3;
         if (game_mode.equals("hard") || game_mode.equals("easy")) 
-          depth = 7;
+          depth = 6;
 
         int val = (game_mode.equals("easy") && turn.equals("white")) || (!game_mode.equals("easy") && turn.equals("black")) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         for (Position move : possible_moves) {
@@ -244,13 +246,13 @@ public class Othello {
         int new_val = minimax(copiedboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, next_turn);
         if ((game_mode.equals("easy") && turn.equals("white")) || ((!game_mode.equals("easy")) && turn.equals("black"))) {
           System.out.println("maximizing");
-            if (val < new_val) {
+            if (val <= new_val) {
             val = new_val;
             next_move = move;
             }
         } else {
-            if (val > new_val) {
-            System.out.println("minimizing");
+          System.out.println("minimizing");
+            if (val >= new_val) {
             val = new_val;
             next_move = move;
             }
