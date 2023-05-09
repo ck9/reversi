@@ -6,7 +6,6 @@ import java.util.*;
 import javax.swing.*;
 
 public class Client extends JFrame{
-    // private Player myPlayer;
     private CardLayout cardLayout = new CardLayout();
     private JPanel contentPane;
     private Othello othello;
@@ -589,7 +588,7 @@ class GamePanel extends JPanel {
         // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
         gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
 
-        System.out.println("updateBoar(Turn: " + othello.get_turn() + ")"); //TODO: 削除
+        System.out.println("updateBoard(Turn: " + othello.get_turn() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
