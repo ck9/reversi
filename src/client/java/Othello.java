@@ -300,6 +300,8 @@ public class Othello {
                 while (is_inrange(dy, dx)) {
                     dy += dz.y;
                     dx += dz.x;
+                    if(is_inrange(dy, dx) && board[dy][dx] == -1)
+                      break;
                     if (is_inrange(dy, dx) && board[dy][dx] == 1) {
                     flag = true;
                     break;
@@ -309,6 +311,8 @@ public class Othello {
                 while (is_inrange(dy, dx)) {
                     dy += dz.y;
                     dx += dz.x;
+                    if(is_inrange(dy, dx) && board[dy][dx] == -1)
+                      break;
                     if (is_inrange(dy, dx) && board[dy][dx] == 0) {
                     flag = true;
                     break;
