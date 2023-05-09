@@ -102,7 +102,7 @@ class TitlePanel extends JPanel {
         JPanel titleHeaderPanel = new JPanel();
         titleHeaderPanel.setLayout(new BorderLayout());
         JLabel userNameLabel = new JLabel("  User: " + myPlayer.getName());
-        userNameLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        userNameLabel.setFont(new Font("Serif", Font.PLAIN, 20));
         userNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         titleHeaderPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         titleHeaderPanel.add(userNameLabel, BorderLayout.CENTER);
@@ -115,7 +115,7 @@ class TitlePanel extends JPanel {
 
         // ゲームタイトル
         JLabel titleLabel = new JLabel("Reversi !");
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 50));
+        titleLabel.setFont(new Font("Serif", Font.PLAIN, 50));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleMainPanel.add(titleLabel);
 
@@ -127,7 +127,7 @@ class TitlePanel extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         JLabel networkLabel = new JLabel("ネットワーク対戦");
-        networkLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        networkLabel.setFont(new Font("Serif", Font.PLAIN, 20));
         networkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         buttonPanel.add(networkLabel);
         buttonPanel.add(Box.createVerticalStrut(10));
@@ -136,7 +136,7 @@ class TitlePanel extends JPanel {
         networkBtnPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JButton networkBtn = new JButton("Connect");
         networkBtn.setPreferredSize(new Dimension(300, 40));
-        networkBtn.setFont(new Font("Arial", Font.PLAIN,20));
+        networkBtn.setFont(new Font("Serif", Font.PLAIN,20));
         networkBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 startGameNetwork();
@@ -147,7 +147,7 @@ class TitlePanel extends JPanel {
 
 
         JLabel localLabel = new JLabel("コンピュータ対戦");
-        localLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        localLabel.setFont(new Font("Serif", Font.PLAIN, 20));
         localLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         buttonPanel.add(localLabel);
         buttonPanel.add(Box.createVerticalStrut(10));
@@ -161,7 +161,7 @@ class TitlePanel extends JPanel {
             int difficulty = i;
             localButtons[i] = new JButton(difficulties[i]);
             localButtons[i].setPreferredSize(new Dimension(100, 40));
-            localButtons[i].setFont(new Font("Arial", Font.PLAIN, 20));
+            localButtons[i].setFont(new Font("Serif", Font.PLAIN, 20));
             localButtons[i].addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     startGameLocal(difficulty);
@@ -242,7 +242,7 @@ class NetworkPanel extends JPanel {
 
         // ゲームモード表示(ネットワーク対戦)
         JLabel connectingLabel = new JLabel("ネットワーク対戦");
-        connectingLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+        connectingLabel.setFont(new Font("Serif", Font.PLAIN, 30));
         connectingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(connectingLabel);
 
@@ -250,7 +250,7 @@ class NetworkPanel extends JPanel {
 
         //接続状況表示
         connectingInfoLabel = new JLabel("");
-        connectingInfoLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        connectingInfoLabel.setFont(new Font("Serif", Font.PLAIN, 20));
         connectingInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(connectingInfoLabel);
 
@@ -258,11 +258,11 @@ class NetworkPanel extends JPanel {
 
         //接続先サーバー情報表示(IPアドレス:ポート番号)
         serverInfoLabel1 = new JLabel("");
-        serverInfoLabel1.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel1.setFont(new Font("Serif", Font.PLAIN, 15));
         serverInfoLabel1.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(serverInfoLabel1);
         serverInfoLabel2 = new JLabel("");
-        serverInfoLabel2.setFont(new Font("Arial", Font.PLAIN, 15));
+        serverInfoLabel2.setFont(new Font("Serif", Font.PLAIN, 15));
         serverInfoLabel2.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(serverInfoLabel2);
 
@@ -356,7 +356,7 @@ class GamePanel extends JPanel {
         passBtnsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         passBtn = new JButton("パス");
         passBtn.setPreferredSize(new Dimension(180, 40));
-        passBtn.setFont(new Font("Arial", Font.PLAIN, 20));
+        passBtn.setFont(new Font("Serif", Font.PLAIN, 20));
         passBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 putStorn(-1, -1);
@@ -365,7 +365,7 @@ class GamePanel extends JPanel {
         passBtnsPanel.add(passBtn);
         giveUpBtn = new JButton("投了");
         giveUpBtn.setPreferredSize(new Dimension(180, 40));
-        giveUpBtn.setFont(new Font("Arial", Font.PLAIN, 20));
+        giveUpBtn.setFont(new Font("Serif", Font.PLAIN, 20));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 endGame("playerGiveUp");
@@ -418,7 +418,7 @@ class GamePanel extends JPanel {
         myInfoPanel.add(myStoneIconLabel);        
         myInfoPanel.add(Box.createHorizontalStrut(8));
         myName = new JLabel(myPlayer.getName()+"(You)");
-        myName.setFont(new Font("Arial", Font.PLAIN, 30));
+        myName.setFont(new Font("Serif", Font.PLAIN, 30));
         myInfoPanel.add(myName);
         infoPanel.add(myInfoPanel);
 
@@ -435,7 +435,7 @@ class GamePanel extends JPanel {
         opponentInfoPanel.add(opponentStoneIconLabel);
         opponentInfoPanel.add(Box.createHorizontalStrut(8));
         opponentName = new JLabel(opponentPlayer.getName());
-        opponentName.setFont(new Font("Arial", Font.PLAIN, 30));
+        opponentName.setFont(new Font("Serif", Font.PLAIN, 30));
         opponentInfoPanel.add(opponentName);
         infoPanel.add(opponentInfoPanel);
 
