@@ -1,5 +1,6 @@
 package server.java;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -71,11 +72,13 @@ public class Server{
 		}
 
 
-	public boolean isBlocked(String PlayerIP) {
+	public boolean isBlocked(String PlayerIP) throws IOException {
 		BufferedReader br1 = null;
 		try {
 			br1 = new BufferedReader(new FileReader("black_list.txt"));
 		} catch (FileNotFoundException e) {
+			File file = new File("/reversi/src/server/black_list.txt");
+			file.createNewFile();
 			e.printStackTrace();
 		}
 		String s;
@@ -91,9 +94,6 @@ public class Server{
 		return false;
 	}
 
-
-	public void printStatus(){ //クライアント接続状態の確認
-	}
 
 	public String sendColor(){//先手後手情報(白黒)の送信
 		String a;
@@ -138,7 +138,7 @@ public class Server{
             }
         }
         Server server = new Server(8888);
-
+        server.run();
 
 
         return;
