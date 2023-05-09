@@ -1,71 +1,75 @@
 package server.java;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.*;
 import java.util.Random;
 
 public class Server{
-	private int port; // サーバの待ち受けポート
-	private boolean [] online; //オンライン状態管理用配列
-	private PrintWriter [] out; //データ送信用オブジェクト
-	private Receiver [] receiver; //データ受信用オブジェクト
+	private int port;
+	private Server2 client1, client2;
+	private String S1;
+	private String S2;
 	private int color=0; //先手後手決定のためのint
 	private boolean color1;
 
-	//コンストラクタ
-	public Server(int port) { //待ち受けポートを引数とする
-		this.port = port; //待ち受けポートを渡す
-		out = new PrintWriter [2]; //データ送信用オブジェクトを2クライアント分用意
-		receiver = new Receiver [2]; //データ受信用オブジェクトを2クライアント分用意
-		online = new boolean[2]; //オンライン状態管理用配列を用意
+	public Server(int port) {
+		this.port=port;
+		Server2 client1 = new Server2();
+		Server2 client2 = new Server2();
+
 	}
 
-	// データ受信用スレッド(内部クラス)
-	class Receiver extends Thread {
-		private InputStreamReader sisr; //受信データ用文字ストリーム
-		private BufferedReader br; //文字ストリーム用のバッファ
-		private int playerNo; //プレイヤを識別するための番号
-
-		// 内部クラスReceiverのコンストラクタ
-		Receiver (Socket socket, int playerNo){
-			try{
-				this.playerNo = playerNo; //プレイヤ番号を渡す
-				sisr = new InputStreamReader(socket.getInputStream());
-				br = new BufferedReader(sisr);
-			} catch (IOException e) {
-				System.err.println("データ受信時にエラーが発生しました: " + e);
-			}
-		}
-		// 内部クラス Receiverのメソッド
-		public void run(){
-			try{
-				while(true) {// データを受信し続ける
-					String inputLine = br.readLine();//データを一行分読み込む
-					if (inputLine != null){ //データを受信したら
-						forwardMessage(inputLine, playerNo); //もう一方に転送する
+	public void run() {
+		try {
+			client1.connect(getConnection());
+			client2.connect(getConnection());
+			if((client1.isConnected())&&(client2.isConnected())) {
+				client1.setPlayerName(client1.receiveFromClient());
+				client2.setPlayerName(client2.receiveFromClient());
+				client1.setColor(sendColor());
+				client2.setColor(sendColor());
+				client1.sendToClient(client2.getPlayerName());
+				client1.sendToClient(client2.getColor());
+				client2.sendToClient(client1.getPlayerName());
+				client2.sendToClient(client1.getColor());
+				while(true) {
+					if(client1.getColor()=="black") {
+						client2.sendToClient(client1.receiveFromClient());
+						client1.sendToClient(client2.receiveFromClient());
+					} else if(client1.getColor()=="white") {
+						client1.sendToClient(client2.receiveFromClient());
+						client2.sendToClient(client1.receiveFromClient());
 					}
 				}
-			} catch (IOException e){ // 接続が切れたとき
-				System.err.println("プレイヤ " + playerNo + "との接続が切れました．");
-				online[playerNo] = false; //プレイヤの接続状態を更新する
-				printStatus(); //接続状態を出力する
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
 	}
 
-	// メソッド
+	private Socket getConnection() {
+			ServerSocket ss1 = null;
+			Socket socket = null;
+			BufferedReader reader = null;
+			PrintWriter writer = null;
+			try {
+				ss1 = new ServerSocket();
+				ss1.bind(new InetSocketAddress("127.0.0.1",port));
+				return ss1.accept();
 
-	public void acceptClient(){ //クライアントの接続(サーバの起動)
-		try {
-			System.out.println("サーバが起動しました．");
-			ServerSocket ss = new ServerSocket(port); //サーバソケットを用意
-			while (true) {
-				Socket socket = ss.accept(); //新規接続を受け付ける
+			} catch (IOException e) {
+				e.printStackTrace();
+			}finally{
+
 			}
-		} catch (Exception e) {
-			System.err.println("ソケット作成時にエラーが発生しました: " + e);
 		}
-	}
+
 
 	public boolean isBlocked(String PlayerIP) {
 		BufferedReader br1 = null;
@@ -91,32 +95,35 @@ public class Server{
 	public void printStatus(){ //クライアント接続状態の確認
 	}
 
-	public void sendColor(int playerNo){ //先手後手情報(白黒)の送信
+	public String sendColor(){//先手後手情報(白黒)の送信
+		String a;
 		if(color==0) {
+			color=1;
 		Random r = new Random();
 		int r1 = r.nextInt(2);
 		if(r1 == 0) {
-		out[playerNo].println("black");
-		color1 = false;
+			a=("black");
+			color1 = false;
+		    return a;
 		}else {
-			out[playerNo].println("white");
+			a=("white");
 			color1 = true;
+			return a;
 		}
-		color=1;
 		}else if(color==1) {
-			if(color1==false) {
-				out[playerNo].println("white");
-			}else {
-				out[playerNo].println("black");
-			}
 			color=0;
+			if(color1==false) {
+				a=("white");
+				return a;
+			}else {
+				a=("black");
+				return a;
+			}
 		}
+		return null;
 
 	}
 
-	public void forwardMessage(String msg, int playerNo){ //操作情報の転送
-		out[playerNo].println(msg);
-	}
 
 	public static void main(String[] args){ //main
 		if (args.length > 0) {
@@ -131,7 +138,9 @@ public class Server{
             }
         }
         Server server = new Server(8888);
-        server.acceptClient(); //クライアント受け入れを開始
+
+
+
         return;
 	}
 }
