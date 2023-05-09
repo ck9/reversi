@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.prefs.BackingStoreException;
 
 public class Othello {
     private int row = 8; //盤面のサイズ
@@ -347,6 +348,8 @@ public class Othello {
             while (is_inrange(dy, dx)) {
             dy += dz.y;
             dx += dz.x;
+            if(is_inrange(dy, dx) && board[dy][dx] == -1)
+                break;
             if (is_inrange(dy, dx) && board[dy][dx] == 1) {
                 can_flip = true;
                 break;
@@ -365,6 +368,8 @@ public class Othello {
             while (is_inrange(dy, dx)) {
             dy += dz.y;
             dx += dz.x;
+            if(is_inrange(dy, dx) && board[dy][dx] == -1)
+                break;
             if (is_inrange(dy, dx) && board[dy][dx] == 0) {
                 can_flip = true;
                 break;
