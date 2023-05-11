@@ -92,14 +92,14 @@ public class Othello {
         double rnd = random.nextDouble();
         int board_value = 0;
         int[][] evaluationBoard = {
-          {100, -40, 20,  5,  5, 20, -40, 100},
-          {-40, -80, -1, -1, -1, -1, -80, -40},
-          { 20,  -1,  5,  1,  1,  5,  -1,  20},
-          {  5,  -1,  1,  0,  0,  1,  -1,   5},
-          {  5,  -1,  1,  0,  0,  1,  -1,   5},
-          { 20,  -1,  5,  1,  1,  5,  -1,  20},
-          {-40, -80, -1, -1, -1, -1, -80, -40},
-          {100, -40, 20,  5,  5, 20, -40, 100}
+          { 45, -11,  4, -1, -1,  4, -11,  45},
+          {-11, -16, -1, -3, -3, -1, -16, -11},
+          {  4,  -1,  2, -1, -1,  2,  -1,   4},
+          { -1,  -3, -1,  0,  0, -1,  -3,  -1},
+          { -1,  -3, -1,  0,  0, -1,  -3,  -1},
+          {  4,  -1,  2, -1, -1,  2,  -1,   4},
+          {-11, -16, -1, -3, -3, -1, -16, -11},
+          { 45, -11,  4, -1, -1,  4, -11,  45}
         };
 
         for (int y = 0; y < board.length; ++y) {
@@ -112,7 +112,7 @@ public class Othello {
             }
           }
         }
-        board_value *= (int)(3 * rnd);
+        board_value = board_value * ((int)(3 * rnd) + 1) * 11;
 
         //fsの実装
         int fs_value = 0;
@@ -160,7 +160,7 @@ public class Othello {
         possible_moves_value = (possible_moves_value + (int)(rnd * 2)) * 10;
 
         int result_value = 0;
-        int fs_weight = 5, board_weight = 2, possible_moves_weight = 1;
+        int fs_weight = 5, board_weight = 3, possible_moves_weight = 1;
         //System.out.println("board_value: " + board_value + ", fs_value: " + fs_value + ", possible_moves_value: " + possible_moves_value);        
         result_value = board_value * board_weight + fs_value * fs_weight + possible_moves_value * possible_moves_weight;
 
