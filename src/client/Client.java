@@ -100,7 +100,7 @@ class TitlePanel extends JPanel {
         JPanel titleHeaderPanel = new JPanel();
         titleHeaderPanel.setLayout(new BorderLayout());
         JLabel userNameLabel = new JLabel("  User: " + myPlayer.getName());
-        userNameLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        userNameLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         userNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         titleHeaderPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         titleHeaderPanel.add(userNameLabel, BorderLayout.CENTER);
@@ -125,7 +125,7 @@ class TitlePanel extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         JLabel networkLabel = new JLabel("ネットワーク対戦");
-        networkLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        networkLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         networkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         buttonPanel.add(networkLabel);
         buttonPanel.add(Box.createVerticalStrut(10));
@@ -134,7 +134,7 @@ class TitlePanel extends JPanel {
         networkBtnPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JButton networkBtn = new JButton("Connect");
         networkBtn.setPreferredSize(new Dimension(300, 40));
-        networkBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN,20));
+        networkBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
         networkBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 startGameNetwork();
@@ -145,7 +145,7 @@ class TitlePanel extends JPanel {
 
 
         JLabel localLabel = new JLabel("コンピュータ対戦");
-        localLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        localLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         localLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         buttonPanel.add(localLabel);
         buttonPanel.add(Box.createVerticalStrut(10));
@@ -250,7 +250,7 @@ class NetworkPanel extends JPanel {
 
         //接続状況表示
         connectingInfoLabel = new JLabel("");
-        connectingInfoLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        connectingInfoLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         connectingInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(connectingInfoLabel);
 
@@ -258,11 +258,11 @@ class NetworkPanel extends JPanel {
 
         //接続先サーバー情報表示(IPアドレス:ポート番号)
         serverInfoLabel1 = new JLabel("");
-        serverInfoLabel1.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
+        serverInfoLabel1.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         serverInfoLabel1.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(serverInfoLabel1);
         serverInfoLabel2 = new JLabel("");
-        serverInfoLabel2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
+        serverInfoLabel2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         serverInfoLabel2.setAlignmentX(Component.CENTER_ALIGNMENT);
         connecctingInfoPanel.add(serverInfoLabel2);
 
@@ -278,7 +278,7 @@ class NetworkPanel extends JPanel {
             serverInfoLabel2.setText("");
 
             // サーバーIPの入力
-            String serverIP = JOptionPane.showInputDialog(this, "サーバーIPを入力してください");
+            String serverIP = JOptionPane.showInputDialog(this, "サーバーのIPアドレスを入力してください");
             if (serverIP == null) {
                 throw new Exception();
             }
@@ -362,7 +362,7 @@ class GamePanel extends JPanel {
         passBtnsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         passBtn = new JButton("パス");
         passBtn.setPreferredSize(new Dimension(180, 40));
-        passBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        passBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         passBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 putStorn(-1, -1);
@@ -371,7 +371,7 @@ class GamePanel extends JPanel {
         passBtnsPanel.add(passBtn);
         giveUpBtn = new JButton("投了");
         giveUpBtn.setPreferredSize(new Dimension(180, 40));
-        giveUpBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        giveUpBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
