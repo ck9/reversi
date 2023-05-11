@@ -1,4 +1,4 @@
-package client.java;
+package client;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ public class Client extends JFrame{
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private TitlePanel titlePanel;
     private NetworkPanel networkPanel;
@@ -28,7 +28,7 @@ public class Client extends JFrame{
         othello = new Othello();
         myPlayer = new Player();
         opponentPlayer = new Player();
-        server = new Server();
+        server = new ServerSocket();
 
         String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
         if (playerName == null || playerName.equals("")) {
@@ -216,7 +216,7 @@ class NetworkPanel extends JPanel {
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private int port;
     private GamePanel gamePanel;
@@ -225,7 +225,7 @@ class NetworkPanel extends JPanel {
     private JLabel serverInfoLabel1;
     private JLabel serverInfoLabel2;
 
-    public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port, Server server) {
+    public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port, ServerSocket server) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
@@ -331,7 +331,7 @@ class GamePanel extends JPanel {
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private JPanel gameScreenPanel;
     private JLabel myStoneIconLabel, opponentStoneIconLabel;
@@ -349,7 +349,7 @@ class GamePanel extends JPanel {
     ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.jpg");
     ImageIcon turnIcon = new ImageIcon("src/client/resources/TurnTriangle.png");
 
-    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, Server server) {
+    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, ServerSocket server) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;

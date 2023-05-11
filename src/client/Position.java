@@ -1,4 +1,4 @@
-package client.java;
+package client;
 
 public class Position {
     // TODO: x,yをprivateにする(Othello.java内で値を直接参照している箇所を修正する必要あり)
