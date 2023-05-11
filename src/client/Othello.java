@@ -1,4 +1,4 @@
-package client.java;
+package client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -244,13 +244,11 @@ public class Othello {
         String next_turn = turn.equals("black") ? "white" : "black";
         int new_val = minimax(copiedboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, next_turn);
         if ((game_mode.equals("easy") && turn.equals("white")) || ((!game_mode.equals("easy")) && turn.equals("black"))) {
-          System.out.println("maximizing");
             if (val <= new_val) {
             val = new_val;
             next_move = move;
             }
         } else {
-          System.out.println("minimizing");
             if (val >= new_val) {
             val = new_val;
             next_move = move;

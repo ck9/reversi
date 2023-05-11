@@ -1,4 +1,4 @@
-package client.java;
+package client;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ public class Client extends JFrame{
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private TitlePanel titlePanel;
     private NetworkPanel networkPanel;
@@ -28,14 +28,13 @@ public class Client extends JFrame{
         othello = new Othello();
         myPlayer = new Player();
         opponentPlayer = new Player();
-        server = new Server();
+        server = new ServerSocket();
 
-        // String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
-        // if (playerName == null) {
-        //     playerName = "Player";
-        // }
-        // myPlayer.setName(playerName);
-        myPlayer.setName("Player"); //TODO: 後で上記と差し替える
+        String playerName = JOptionPane.showInputDialog("プレイヤ名を入力してください。");
+        if (playerName == null || playerName.equals("")) {
+            playerName = "Player";
+        }
+        myPlayer.setName(playerName);
 
         contentPane = new JPanel();
         cardLayout = new CardLayout();
@@ -43,7 +42,7 @@ public class Client extends JFrame{
         setContentPane(contentPane);
 
         titlePanel = new TitlePanel(othello, myPlayer, opponentPlayer);
-        networkPanel = new NetworkPanel(myPlayer, opponentPlayer, port, server);
+        networkPanel = new NetworkPanel(othello, myPlayer, opponentPlayer, port, server);
         gamePanel = new GamePanel(othello, myPlayer, opponentPlayer, server);
         titlePanel.setGamePanel(gamePanel);
         titlePanel.setNetworkPanel(networkPanel);
@@ -214,9 +213,10 @@ class TitlePanel extends JPanel {
 }
 
 class NetworkPanel extends JPanel {
+    private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private int port;
     private GamePanel gamePanel;
@@ -225,7 +225,8 @@ class NetworkPanel extends JPanel {
     private JLabel serverInfoLabel1;
     private JLabel serverInfoLabel2;
 
-    public NetworkPanel(Player myPlayer, Player opponentPlayer, int port, Server server) {
+    public NetworkPanel(Othello othello, Player myPlayer, Player opponentPlayer, int port, ServerSocket server) {
+        this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
         this.server = server;
@@ -289,24 +290,30 @@ class NetworkPanel extends JPanel {
             connectingInfoLabel.setText("対戦相手を探しています...");
             serverInfoLabel1.setText("サーバー情報");
             serverInfoLabel2.setText(serverIP + ":" + port);
+            
+            //自分の名前を送信
+            server.sendToServer(myPlayer.getName());
 
-           //自分の名前を送信
-           server.sendToServer(myPlayer.getName());
-
-           // 相手が接続したら相手の名前、自分の色が順に送られてくる
-           opponentPlayer.setName(server.receiveFromServer());
-           myPlayer.setColor(server.receiveFromServer());
-
-           // 相手の色を設定
-           if (myPlayer.getColor().equals("black")) {
-               opponentPlayer.setColor("white");
-           } else {
-               opponentPlayer.setColor("black");
-           }
-
-           // ゲーム開始
-           ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
-           gamePanel.startGame();
+            new Thread(() -> {
+                try {
+                    // 相手の名前を受信
+                    opponentPlayer.setName(server.receiveFromServer());
+                    // 自分の色を受信
+                    myPlayer.setColor(server.receiveFromServer());
+                    if (myPlayer.getColor().equals("black")) {
+                        opponentPlayer.setColor("white");
+                    } else {
+                        opponentPlayer.setColor("black");
+                    }
+                    othello.startGameNetwork();
+                    // ゲーム開始
+                    ((Client)getParent().getParent().getParent().getParent()).switchPanel("game");
+                    gamePanel.startGame();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
+                    ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
+                }
+            }).start();
             
         }catch(Exception e){
         	JOptionPane.showMessageDialog(this, "接続に失敗しました","接続失敗",JOptionPane.ERROR_MESSAGE);
@@ -324,7 +331,7 @@ class GamePanel extends JPanel {
     private Othello othello;
     private Player myPlayer;
     private Player opponentPlayer;
-    private Server server;
+    private ServerSocket server;
 
     private JPanel gameScreenPanel;
     private JLabel myStoneIconLabel, opponentStoneIconLabel;
@@ -334,15 +341,15 @@ class GamePanel extends JPanel {
     private JButton passBtn, giveUpBtn;
     private JButton[] boardBtns;
 
-    ImageIcon whiteIcon = new ImageIcon("src/client/resources/White.jpg");
-    ImageIcon blackIcon = new ImageIcon("src/client/resources/Black.jpg");
-    ImageIcon whiteIcon2 = new ImageIcon("src/client/resources/White.png");
-    ImageIcon blackIcon2 = new ImageIcon("src/client/resources/Black.png");
-    ImageIcon boardIcon = new ImageIcon("src/client/resources/GreenFrame.jpg");
-    ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.jpg");
+    ImageIcon whiteIcon = new ImageIcon("src/client/resources/White.png");
+    ImageIcon blackIcon = new ImageIcon("src/client/resources/Black.png");
+    ImageIcon whiteIcon2 = new ImageIcon("src/client/resources/White_Tra.png");
+    ImageIcon blackIcon2 = new ImageIcon("src/client/resources/Black_Tra.png");
+    ImageIcon boardIcon = new ImageIcon("src/client/resources/GreenFrame.png");
+    ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.png");
     ImageIcon turnIcon = new ImageIcon("src/client/resources/TurnTriangle.png");
 
-    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, Server server) {
+    public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, ServerSocket server) {
         this.othello = othello;
         this.myPlayer = myPlayer;
         this.opponentPlayer = opponentPlayer;
@@ -367,6 +374,13 @@ class GamePanel extends JPanel {
         giveUpBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                try {
+                    server.sendToServer("-2 -2");
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    endGame("connectionError");
+                    return;
+                }
                 endGame("playerGiveUp");
             }
         });
@@ -449,7 +463,7 @@ class GamePanel extends JPanel {
      */
     public void putStorn(int x, int y) {
         // 自分のターンでない場合は何もしない
-        if (othello.get_turn() != myPlayer.getColor()) {
+        if (!othello.get_turn().equals(myPlayer.getColor())) {
             return;
         }
         // 正常な座標をクリックした場合(パスの場合は-1, -1なのでスキップ)
@@ -470,71 +484,82 @@ class GamePanel extends JPanel {
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
-        othello.change_turn();
-        updateBoard();
 
         // ネットワーク対戦の場合はサーバーに自分の指し手を送信
-        if (othello.getGameMode() == "pvp") {
+        if (othello.getGameMode().equals("pvp")) {
             try {
                 server.sendToServer(x + " " + y);
             } catch (Exception e) {
                 e.printStackTrace();
                 endGame("connectionError");
+                return;
             }
         }
+
+        othello.change_turn();
+        updateBoard();
 
         // 相手のターンの処理
         opponentPutStorn();
     }
 
-    public void opponentPutStorn() {
-        // 相手のターンの処理(ネットワーク対戦)
-        if (othello.getGameMode() == "pvp") {
+    public void pvpOpponentPutStorn() {
+        new Thread(() -> {
+            String opponentMove = null;
             try {
-                // 相手の指し手を受信
-                String opponentMove = server.receiveFromServer();
-                System.out.println("opponentMove: " + opponentMove); //TODO: 削除
-                String[] opponentMoveArray = opponentMove.split(" ");
-                int x = Integer.parseInt(opponentMoveArray[0]);
-                int y = Integer.parseInt(opponentMoveArray[1]);
-
-                // "-2 -2": 相手が投了または切断、ゲーム終了
-                if (x == -2 && y == -2) {
-                    endGame("opponentGiveUp");
+                opponentMove = server.receiveFromServer();
+                if (opponentMove == null) {
+                    endGame("connectionError");
                     return;
-                }
-                // "-1 -1": 相手がパス (それ以外なら相手の座標を反映)
-                else if (x != -1 && y != -1) {
-                    othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 endGame("connectionError");
+                return;
             }
-        }
-        // 相手のターンの処理(コンピュータ対戦)
-        else{
+            String[] opponentMoveArray = opponentMove.split(" ");
+            int x = Integer.parseInt(opponentMoveArray[0]);
+            int y = Integer.parseInt(opponentMoveArray[1]);
+            // "-2 -2": 相手が投了または切断、ゲーム終了
+            if (x == -2 && y == -2) {
+                endGame("opponentGiveUp");
+                return;
+            }
+            if (x != -1 && y != -1){
+                othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
+            }
+            othello.change_turn();
+            updateBoard();
+
+        }).start();
+    } 
+
+    public void opponentPutStorn() {
+        // 相手のターンの処理(ネットワーク対戦)
+        if (othello.getGameMode().equals("pvp")) {
+            pvpOpponentPutStorn();
+        } else { // 相手のターンの処理(コンピュータ対戦)
             Position computerMove = othello.get_computer_move(othello.get_board(), othello.get_turn(), othello.getGameMode());
             System.out.println("computerMove: " + computerMove.getX() + ", " + computerMove.getY()); //TODO: 削除
             if (computerMove.getX() != -1 && computerMove.getY() != -1){
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
+            othello.change_turn();
+            updateBoard();
         }
-        othello.change_turn();
-        updateBoard();
     }
 
     private void updateBoard(){
         int[][] board = othello.get_board();
         ArrayList<Position> possible_moves = othello.get_possible_moves(board, othello.get_turn());
         // パスの有効化・無効化
-        if (possible_moves.size() == 0){
+        if (possible_moves.size() == 0 && othello.get_turn().equals(myPlayer.getColor())){
             passBtn.setEnabled(true);
         }
         else{
             passBtn.setEnabled(false);
         }
-        // 投了の有効化・無効化(自分のターンのみ)
+        // パス、投了の有効化・無効化(自分のターンのみ)
         if (othello.get_turn().equals(myPlayer.getColor())){
             giveUpBtn.setEnabled(true);
         }
@@ -548,21 +573,23 @@ class GamePanel extends JPanel {
                     boardBtns[i * othello.get_row() + j].setIcon(boardIcon);
                 } else if (board[i][j] == 1) {
                     boardBtns[i * othello.get_row() + j].setIcon(blackIcon);
-                } else if (board[i][j] == 0) {
+                } else if (board[i][j] == 0)  {
                     boardBtns[i * othello.get_row() + j].setIcon(whiteIcon);
                 }
-                for (Position pos : possible_moves) {
-                    if (pos.getX() == j && pos.getY() == i) {
-                        boardBtns[i * othello.get_row() + j].setIcon(possibleIcon);
+                if(othello.get_turn().equals(myPlayer.getColor())){
+                    for (Position pos : possible_moves) {
+                        if (pos.getX() == j && pos.getY() == i) {
+                            boardBtns[i * othello.get_row() + j].setIcon(possibleIcon);
+                        }
                     }
                 }
             }
         }
         // info表示の更新
-        if (myPlayer.getColor() == "black") {
+        if (myPlayer.getColor().equals("black")) {
             myStoneIconLabel.setIcon(blackIcon2);
             opponentStoneIconLabel.setIcon(whiteIcon2);
-            if (othello.get_turn() == "black") {
+            if (othello.get_turn().equals("black")) {
                 myTurnIconLabel.setIcon(turnIcon);
                 opponentTurnIconLabel.setIcon(null);
             } else {
@@ -572,7 +599,7 @@ class GamePanel extends JPanel {
         } else {
             myStoneIconLabel.setIcon(whiteIcon2);
             opponentStoneIconLabel.setIcon(blackIcon2);
-            if (othello.get_turn() == "white") {
+            if (othello.get_turn().equals("white")) {
                 myTurnIconLabel.setIcon(turnIcon);
                 opponentTurnIconLabel.setIcon(null);
             } else {
@@ -587,8 +614,7 @@ class GamePanel extends JPanel {
 
         // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
         gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
-
-        System.out.println("updateBoard(Turn: " + othello.get_turn() + ")"); //TODO: 削除
+        System.out.println("updateBoard(Turn: " + othello.get_turn() + ", myColor: " + myPlayer.getColor() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
@@ -617,13 +643,13 @@ class GamePanel extends JPanel {
             }
             message = "黒: " + blackCount + "  白: " + whiteCount + "\n";
             if (blackCount > whiteCount) {
-                if (myPlayer.getColor() == "black") {
+                if (myPlayer.getColor().equals("black")) {
                     message += "You Win!\n";
                 } else {
                     message += "You Lose...\n";
                 }
             } else if (blackCount < whiteCount) {
-                if (myPlayer.getColor() == "black") {
+                if (myPlayer.getColor().equals("black")) {
                     message += "You Lose...\n";
                 } else {
                     message += "You Win!\n";
@@ -632,6 +658,10 @@ class GamePanel extends JPanel {
                 message += "Draw\n";
             }
         }
+        try {
+            server.disconnect();
+        } catch (Exception e) {
+        }
         JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.INFORMATION_MESSAGE);
         ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
     }
@@ -639,8 +669,9 @@ class GamePanel extends JPanel {
     public void startGame() {
         myName.setText(myPlayer.getName() + "(You)");
         opponentName.setText(opponentPlayer.getName());
+        updateBoard();
         // 相手が先手の場合は待機
-        if (opponentPlayer.getColor() == "black") {
+        if (opponentPlayer.getColor().equals("black")) {
             opponentPutStorn();
         }
         updateBoard();

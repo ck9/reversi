@@ -1,4 +1,4 @@
-package client.java;
+package client;
 
 public class Player {
 	private String myName; //プレイヤ名
