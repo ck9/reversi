@@ -659,9 +659,11 @@ class GamePanel extends JPanel {
                 message += "Draw\n";
             }
         }
-        try {
-            server.disconnect();
-        } catch (Exception e) {
+        if (othello.getGameMode().equals("pvp")) {
+            try {
+                server.disconnect();
+            } catch (Exception e) {
+            }
         }
         JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.INFORMATION_MESSAGE);
         ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
