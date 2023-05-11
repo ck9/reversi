@@ -83,7 +83,7 @@ public class Server{
 					}
 				}
 			} catch (IOException e) {
-				System.err.println(e.getMessage() + "1");
+				System.err.println(e.getMessage());
 			} finally {
 				endGame();
 			}
@@ -103,7 +103,7 @@ public class Server{
 					}
 				}
 			} catch (IOException e) {
-				System.err.println(e.getMessage() + "2");
+				System.err.println(e.getMessage());
 			} finally {
 				endGame();
 			}

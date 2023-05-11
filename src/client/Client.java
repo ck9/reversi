@@ -341,12 +341,12 @@ class GamePanel extends JPanel {
     private JButton passBtn, giveUpBtn;
     private JButton[] boardBtns;
 
-    ImageIcon whiteIcon = new ImageIcon("src/client/resources/White.jpg");
-    ImageIcon blackIcon = new ImageIcon("src/client/resources/Black.jpg");
-    ImageIcon whiteIcon2 = new ImageIcon("src/client/resources/White.png");
-    ImageIcon blackIcon2 = new ImageIcon("src/client/resources/Black.png");
-    ImageIcon boardIcon = new ImageIcon("src/client/resources/GreenFrame.jpg");
-    ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.jpg");
+    ImageIcon whiteIcon = new ImageIcon("src/client/resources/White.png");
+    ImageIcon blackIcon = new ImageIcon("src/client/resources/Black.png");
+    ImageIcon whiteIcon2 = new ImageIcon("src/client/resources/White_Tra.png");
+    ImageIcon blackIcon2 = new ImageIcon("src/client/resources/Black_Tra.png");
+    ImageIcon boardIcon = new ImageIcon("src/client/resources/GreenFrame.png");
+    ImageIcon possibleIcon = new ImageIcon("src/client/resources/GreenPossibleFrame.png");
     ImageIcon turnIcon = new ImageIcon("src/client/resources/TurnTriangle.png");
 
     public GamePanel(Othello othello, Player myPlayer, Player opponentPlayer, ServerSocket server) {
@@ -614,7 +614,7 @@ class GamePanel extends JPanel {
 
         // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
         gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
-        System.out.println(myPlayer.getName() + " updateBoard(Turn: " + othello.get_turn() + ", myColor: " + myPlayer.getColor() + ")"); //TODO: 削除
+        System.out.println("updateBoard(Turn: " + othello.get_turn() + ", myColor: " + myPlayer.getColor() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
