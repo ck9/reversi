@@ -374,12 +374,13 @@ class GamePanel extends JPanel {
         giveUpBtn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
         giveUpBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    server.sendToServer("-2 -2");
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                    endGame("connectionError");
-                    return;
+                if (othello.getGameMode().equals("pvp")) {
+                    try {
+                        server.sendToServer("-2 -2");
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                        endGame("connectionError");
+                    }
                 }
                 endGame("playerGiveUp");
             }
@@ -658,9 +659,11 @@ class GamePanel extends JPanel {
                 message += "Draw\n";
             }
         }
-        try {
-            server.disconnect();
-        } catch (Exception e) {
+        if (othello.getGameMode().equals("pvp")) {
+            try {
+                server.disconnect();
+            } catch (Exception e) {
+            }
         }
         JOptionPane.showMessageDialog(this, message, "ゲーム終了", JOptionPane.INFORMATION_MESSAGE);
         ((Client)getParent().getParent().getParent().getParent()).switchPanel("title");
