@@ -6,132 +6,135 @@ import java.util.Random;
 
 public class Server{
 	private int port; // サーバの待ち受けポート
-	private boolean [] online; //オンライン状態管理用配列
-	private PrintWriter [] out; //データ送信用オブジェクト
-	private Receiver [] receiver; //データ受信用オブジェクト
-	private int color=0; //先手後手決定のためのint
-	private boolean color1;
+	private ClientSocket client1, client2; // クライアントソケット
 
 	//コンストラクタ
 	public Server(int port) { //待ち受けポートを引数とする
 		this.port = port; //待ち受けポートを渡す
-		out = new PrintWriter [2]; //データ送信用オブジェクトを2クライアント分用意
-		receiver = new Receiver [2]; //データ受信用オブジェクトを2クライアント分用意
-		online = new boolean[2]; //オンライン状態管理用配列を用意
-	}
-
-	// データ受信用スレッド(内部クラス)
-	class Receiver extends Thread {
-		private InputStreamReader sisr; //受信データ用文字ストリーム
-		private BufferedReader br; //文字ストリーム用のバッファ
-		private int playerNo; //プレイヤを識別するための番号
-
-		// 内部クラスReceiverのコンストラクタ
-		Receiver (Socket socket, int playerNo){
-			try{
-				this.playerNo = playerNo; //プレイヤ番号を渡す
-				sisr = new InputStreamReader(socket.getInputStream());
-				br = new BufferedReader(sisr);
-			} catch (IOException e) {
-				System.err.println("データ受信時にエラーが発生しました: " + e);
-			}
-		}
-		// 内部クラス Receiverのメソッド
-		public void run(){
-			try{
-				while(true) {// データを受信し続ける
-					String inputLine = br.readLine();//データを一行分読み込む
-					if (inputLine != null){ //データを受信したら
-						forwardMessage(inputLine, playerNo); //もう一方に転送する
-					}
-				}
-			} catch (IOException e){ // 接続が切れたとき
-				System.err.println("プレイヤ " + playerNo + "との接続が切れました．");
-				online[playerNo] = false; //プレイヤの接続状態を更新する
-				printStatus(); //接続状態を出力する
-			}
-		}
+		client1 = new ClientSocket();
+		client2 = new ClientSocket();
 	}
 
 	// メソッド
-
 	public void acceptClient(){ //クライアントの接続(サーバの起動)
+		System.out.println("[info] サーバーを起動します。 Port:" + port);
+		try (ServerSocket serverSocket = new ServerSocket(port)) {
+			while(true){
+				if (!client1.isConnected()) {
+					System.out.println("[info] クライアント1の接続を待っています。");
+					Socket socket = serverSocket.accept(); //クライアントからの接続を待つ
+					if (client1.connect(socket)) {
+						client1.setName(client1.receiveFromClient()); //クライアントからプレイヤー名を受け取りセット
+						System.out.println(client1.getName() + "(" + client1.getClientIp() + "): 接続しました．");
+					}
+				} else if (!client2.isConnected()) {
+					System.out.println("[info] クライアント2の接続を待っています。");
+					Socket socket = serverSocket.accept(); //クライアントからの接続を待つ
+					if (client2.connect(socket)) {
+						client2.setName(client2.receiveFromClient()); //クライアントからプレイヤー名を受け取りセット
+						System.out.println(client2.getName() + "(" + client2.getClientIp() + "): 接続しました．");
+						System.out.println("[info] 接続が完了しました。ゲームを開始します。");
+						startGame(); //ゲーム開始
+					}
+				}
+				Thread.sleep(10);
+			}
+		} catch(Exception e){
+			System.out.println("[error] サーバーの起動に失敗しました。");
+		}
+	}
+
+	public void startGame(){ //ゲームの開始
+		// 各クライアントに対して相手の名前を通知
+		client1.sendToClient(client2.getName());
+		client2.sendToClient(client1.getName());
+
+		// 先攻後攻をランダムに決めて各クライアントに通知
+		Random random = new Random();
+		int turn = random.nextInt(2);
 		try {
-			System.out.println("サーバが起動しました．");
-			ServerSocket ss = new ServerSocket(port); //サーバソケットを用意
-			while (true) {
-				Socket socket = ss.accept(); //新規接続を受け付ける
+			if (turn == 0) {
+				client1.sendToClient("black");
+				client2.sendToClient("white");
+				System.out.println("black: " + client1.getName() + "(" + client1.getClientIp() + ") vs white: " + client2.getName() + "(" + client2.getClientIp() + ")");
+			} else {
+				client1.sendToClient("white");
+				client2.sendToClient("black");
+				System.out.println("black: " + client2.getName() + "(" + client2.getClientIp() + ") vs white: " + client1.getName() + "(" + client1.getClientIp() + ")");
 			}
 		} catch (Exception e) {
-			System.err.println("ソケット作成時にエラーが発生しました: " + e);
+			System.out.println("クライアントの接続が切断されました．");
+			endGame();
+			return;
 		}
-	}
 
-	public boolean isBlocked(String PlayerIP) {
-		BufferedReader br1 = null;
-		try {
-			br1 = new BufferedReader(new FileReader("black_list.txt"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		String s;
-		try {
-			while((s = br1.readLine()) != null) {
-				if(s.equals(PlayerIP)) {
-					return true;
+		// クライアントからのメッセージを受け取り，相手に送信するスレッドをそれぞれ起動
+		new Thread(() -> {
+			try {
+				while (true) {
+					String message = client1.receiveFromClient();
+					if (message == null) {
+						System.out.println(client1.getName() + "(" + client1.getClientIp() + "): 切断しました。");
+						break;
+					}
+					System.out.println(client1.getName() + "(" + client1.getClientIp() + "): " + message);
+					if (client2.isConnected()){
+						client2.sendToClient(message);
+					}
 				}
+			} catch (IOException e) {
+				System.err.println(e.getMessage() + "1");
+			} finally {
+				endGame();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+		}).start();
 
-
-	public void printStatus(){ //クライアント接続状態の確認
-	}
-
-	public void sendColor(int playerNo){ //先手後手情報(白黒)の送信
-		if(color==0) {
-		Random r = new Random();
-		int r1 = r.nextInt(2);
-		if(r1 == 0) {
-		out[playerNo].println("black");
-		color1 = false;
-		}else {
-			out[playerNo].println("white");
-			color1 = true;
-		}
-		color=1;
-		}else if(color==1) {
-			if(color1==false) {
-				out[playerNo].println("white");
-			}else {
-				out[playerNo].println("black");
+		new Thread(() -> {
+			try {
+				while (true) {
+					String message = client2.receiveFromClient();
+					if (message == null) {
+						System.out.println(client2.getName() + "(" + client2.getClientIp() + "): 切断しました。");
+						break;
+					}
+					System.out.println(client2.getName() + "(" + client2.getClientIp() + "): " + message);
+					if (client1.isConnected()){
+						client1.sendToClient(message);
+					}
+				}
+			} catch (IOException e) {
+				System.err.println(e.getMessage() + "2");
+			} finally {
+				endGame();
 			}
-			color=0;
-		}
-
+		}).start();
 	}
 
-	public void forwardMessage(String msg, int playerNo){ //操作情報の転送
-		out[playerNo].println(msg);
+	private void endGame() {
+		try {
+			client1.disconnect();
+			client2.disconnect();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	public static void main(String[] args){ //main
+		Integer port = 8888;
 		if (args.length > 0) {
-            try {
-                int port = Integer.parseInt(args[0]);
-                if (port > 0 && port < 65536) {
-                	Server server = new Server(port);
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                 return;
-            }
-        }
-        Server server = new Server(8888);
-        server.acceptClient(); //クライアント受け入れを開始
-        return;
+			try {
+				int argPort = Integer.parseInt(args[0]);
+				if (argPort > 0 && argPort < 65536) {
+					port = argPort;
+					return;
+				}
+			} catch (NumberFormatException e) {
+				return;
+			}
+		}
+		Server server = new Server(port); //サーバオブジェクトを用意
+		server.acceptClient(); //クライアント受け入れを開始
+		return;
 	}
+
 }
