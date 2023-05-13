@@ -54,6 +54,9 @@ public class Client extends JFrame{
 
         cardLayout.show(contentPane, "title");
 
+        ImageIcon icon = new ImageIcon("src/client/resources/Icon.png");
+        setIconImage(icon.getImage());
+
         setVisible(true);
     }
     public void switchPanel(String panelName) {
