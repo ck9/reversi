@@ -19,7 +19,7 @@ public class Client extends JFrame{
 
 
     public Client(int port) {
-        setTitle("Reversi"); //ウィンドウタイトルを設定
+        setTitle("Reversi !"); //ウィンドウタイトルを設定
         setSize(400, 600); //ウィンドウサイズを設定(幅400, 高さ600)
         setResizable(false); //ウィンドウサイズ変更不可に
         setLocationRelativeTo(null); //ウィンドウを画面中央に表示
@@ -112,7 +112,7 @@ class TitlePanel extends JPanel {
         JPanel titleMainPanel = new JPanel();
         titleMainPanel.setLayout(new BoxLayout(titleMainPanel, BoxLayout.Y_AXIS));
 
-        titleMainPanel.add(Box.createVerticalStrut(80));
+        titleMainPanel.add(Box.createVerticalStrut(50));
 
         // ゲームタイトル
         JLabel titleLabel = new JLabel("Reversi !");
@@ -120,7 +120,15 @@ class TitlePanel extends JPanel {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleMainPanel.add(titleLabel);
 
-        titleMainPanel.add(Box.createVerticalStrut(80));
+        titleMainPanel.add(Box.createVerticalStrut(20));
+
+        Image iconImage = Toolkit.getDefaultToolkit().getImage("src/client/resources/Icon.png");
+        ImageIcon icon = new ImageIcon(iconImage.getScaledInstance(80, 80, Image.SCALE_SMOOTH));
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleMainPanel.add(iconLabel);
+
+        titleMainPanel.add(Box.createVerticalStrut(60));
 
 
         // ゲーム開始ボタン
@@ -172,9 +180,8 @@ class TitlePanel extends JPanel {
         }
 
         buttonPanel.add(localBtnPanel);
+        buttonPanel.add(Box.createVerticalStrut(40));
         titleMainPanel.add(buttonPanel);
-
-        titleMainPanel.add(Box.createVerticalStrut(30));
 
         titleScreenPanel.add(titleMainPanel, BorderLayout.CENTER);
         add(titleScreenPanel, BorderLayout.CENTER);
