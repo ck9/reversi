@@ -79,4 +79,20 @@ public class ClientSocket {
 		return playerName;
 	}
 
+	public static void main(String args[]){
+		// test
+		ClientSocket clientSocket = new ClientSocket();
+        try {
+			Socket socket = new Socket("localhost",8888);
+            clientSocket.connect(socket);
+            System.out.println("isConnected: " + clientSocket.isConnected());
+            clientSocket.sendToClient("hello");
+            System.out.println(clientSocket.receiveFromClient());
+            clientSocket.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+
+
 }
