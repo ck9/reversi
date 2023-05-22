@@ -123,13 +123,12 @@ public class Server{
 		Integer port = 8888;
 		if (args.length > 0) {
 			try {
-				int argPort = Integer.parseInt(args[0]);
+				Integer argPort = Integer.parseInt(args[0]);
 				if (argPort > 0 && argPort < 65536) {
 					port = argPort;
-					return;
 				}
 			} catch (NumberFormatException e) {
-				System.out.println(e.getMessage());
+				System.out.println("ポート番号は1~65535の整数で指定してください。");
 				return;
 			}
 		}
