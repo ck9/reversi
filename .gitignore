@@ -25,17 +25,14 @@ replay_pid*
 
 # block_list file
 block_list.txt
-.metadata/*
-/bin/
 
 # Eclipse
 .project
+.metadata/*
+bin/
 
 # VSCode
 .vscode
 
 # MacOS
 .DS_Store
-
-# for Test
-src/client/java/OhtelloTest.java
