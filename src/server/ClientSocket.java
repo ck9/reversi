@@ -49,7 +49,7 @@ public class ClientSocket {
 
 	private Boolean isBlocked() {
 		String ipadress = getClientIp();
-		File blockListFile = new File("block_List.txt");
+		File blockListFile = new File("block_list.txt");
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(blockListFile)));
 			String line;
