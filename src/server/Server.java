@@ -118,8 +118,7 @@ public class Server{
 			System.out.println(e.getMessage());
 		}
 	}
-
-	public static void main(String[] args){ //main
+	public static void main(String[] args){
 		Integer port = 8888;
 		if (args.length > 0) {
 			try {
