@@ -36,5 +36,4 @@ public class ServerSocket {
     public String receiveFromServer() throws IOException {
         return reader.readLine();
     }
-
 }

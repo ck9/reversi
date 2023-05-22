@@ -62,7 +62,6 @@ public class Client extends JFrame{
     public void switchPanel(String panelName) {
         cardLayout.show(contentPane, panelName);
     }
-
     public static void main(String[] args) {
         Integer port = 8888;
         if (args.length > 0) {
