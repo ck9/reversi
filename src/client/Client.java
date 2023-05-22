@@ -490,7 +490,6 @@ class GamePanel extends JPanel {
                 return;
             }
             else {
-                System.out.println("putStorn: " + x + ", " + y); //TODO: 削除
                 othello.make_move(othello.get_board(), new Position(y, x), othello.get_turn());
             }
         }
@@ -550,7 +549,6 @@ class GamePanel extends JPanel {
             pvpOpponentPutStorn();
         } else { // 相手のターンの処理(コンピュータ対戦)
             Position computerMove = othello.get_computer_move(othello.get_board(), othello.get_turn(), othello.getGameMode());
-            System.out.println("computerMove: " + computerMove.getX() + ", " + computerMove.getY()); //TODO: 削除
             if (computerMove.getX() != -1 && computerMove.getY() != -1){
                 othello.make_move(othello.get_board(), computerMove, othello.get_turn());
             }
@@ -624,7 +622,6 @@ class GamePanel extends JPanel {
 
         // 画面をすぐに更新(対戦相手の思考中であることがわかるように)
         gameScreenPanel.paintImmediately(0, 0, gameScreenPanel.getWidth(), gameScreenPanel.getHeight());
-        System.out.println("updateBoard(Turn: " + othello.get_turn() + ", myColor: " + myPlayer.getColor() + ")"); //TODO: 削除
     }
 
     public void endGame(String mode) {
