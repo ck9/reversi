@@ -129,6 +129,7 @@ public class Server{
 					return;
 				}
 			} catch (NumberFormatException e) {
+				System.out.println(e.getMessage());
 				return;
 			}
 		}
