@@ -12,7 +12,7 @@ A simple network reversi game written in Swing.
 # Demo
 
 <p align="center">
-  <img src="https://github.com/ck9/reversi/assets/47718193/083b6799-6bcf-4514-858d-415cc5bf98f6" />
+  <img src="https://github.com/ck9/reversi/assets/47718193/8e2e04c4-3b0c-4bbe-b52b-827cd57a6755" />
 </p>
 
 # Installation
